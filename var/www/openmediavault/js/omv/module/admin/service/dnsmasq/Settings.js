@@ -99,13 +99,13 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     check: this._updateFormFields,
                     scope: this
                 }
-            }, {
+            },{
                 xtype: "checkbox",
                 name: "log-dhcp",
                 fieldLabel: _("Log DHCP"),
                 boxLabel: _("Log lots of extra information about DHCP transactions."),
                 checked: false
-            }, {
+            },{
                 xtype: "combo",
                 name: "network",
                 hiddenName: "network",
@@ -128,28 +128,28 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                         }]
                     })
                 })
-            }, {
+            },{
                 xtype: "textfield",
                 name: "gateway",
                 fieldLabel: _("Gateway"),
                 vtype: "IPv4",
                 allowBlank: true,
                 value: ""
-            }, {
+            },{
                 xtype: "textfield",
                 name: "first-ip",
                 fieldLabel: _("First IP address"),
                 vtype: "IPv4",
                 allowBlank: true,
                 value: ""
-            }, {
+            },{
                 xtype: "textfield",
                 name: "last-ip",
                 vtype: "IPv4",
                 fieldLabel: _("Last IP address"),
                 allowBlank: true,
                 value: ""
-            }, {
+            },{
                 xtype: "combo",
                 name: "default-lease-time",
                 fieldLabel: _("Lease Time"),
@@ -172,7 +172,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                         ["168h", _("1 week")]
                     ]
                 })
-            }, {
+            },{
                 xtype: "textfield",
                 name: "dns-domains",
                 fieldLabel: _("DNS Search Domain(s)"),
@@ -183,7 +183,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     ptype: "fieldinfo",
                     text: _("Separate multiple entries with commas.")
                 }]
-            }, {
+            },{
                 xtype: "textfield",
                 name: "wins-servers",
                 fieldLabel: _("WINS Server(s)"),
@@ -194,7 +194,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     ptype: "fieldinfo",
                     text: _("Separate multiple entries with commas.")
                 }]
-            }, {
+            },{
                 xtype: "textfield",
                 name: "ntp-servers",
                 fieldLabel: _("NTP Server(s)"),
@@ -205,7 +205,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     ptype: "fieldinfo",
                     text: _("Separate multiple entries with commas.")
                 }]
-            }, {
+            },{
                 xtype: "textfield",
                 name: "dns-servers",
                 fieldLabel: _("DNS Server(s)"),
@@ -216,7 +216,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     ptype: "fieldinfo",
                     text: _("Separate multiple entries with commas.") + ' ' + _('If you only want to use this DNS Server, just enter the IP of this host.')
                 }]
-            }, {
+            },{
                 xtype: "textfield",
                 name: "bootfile",
                 fieldLabel: _("DHCP Boot"),
@@ -228,7 +228,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     text: _("If set, this file must exist on the TFTP share. Example: /pxelinux.0,0.0.0.0")
                 }]
             }]
-        }, {
+        },{
             xtype: "fieldset",
             title: _("Extra"),
             defaults: {
@@ -251,59 +251,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 }]
             }]
         }];
-    },
-
-    initComponent: function () {
-        this.on('load', this._updateFormFields);
-        this.callParent(arguments);
-    },
-
-    _updateFormFields: function () {
-        // Enabled / disabled fields
-        var checked, dhcpen, dchecked, fields, i, colConfig;
-
-        checked = this.findFormField("enable").checked;
-        dhcpen = this.findFormField("dhcp-enable");
-
-        this.findFormField("domain-name").allowBlank = !(checked);
-        dchecked = dhcpen.checked;
-        fields = ["network", "gateway", "first-ip", "last-ip"];
-
-        for (i = 0; i < fields.length; i++) {
-            this.findFormField(fields[i]).allowBlank = !dchecked;
-            if (!dchecked) {
-                this.findFormField(fields[i]).clearInvalid();
-            }
-        }
-
-        // Enable / disable tabs
-        Ext.getCmp('DNSMasqEntriesGridPanel').setDisabled(!checked);
-        Ext.getCmp('DNSMasqLeasesGridPanel').setDisabled(!dchecked);
-
-        // Hide MAC address column if DHCP is not enabled
-        colConfig = [{
-            header: _("Host Name"),
-            sortable: true,
-            dataIndex: "name"
-        }, {
-            header: _("IP Address"),
-            sortable: true,
-            dataIndex: "ip"
-        }, {
-            header: _("Other Names"),
-            sortable: true,
-            dataIndex: "cnames"
-        }, {
-            header: _("MAC Address"),
-            id: 'DNSMasqEntriesGridPanelMacColumn',
-            dataIndex: "mac",
-            sortable: true
-        }];
-
-        if (!dchecked) {
-            colConfig.pop();
-        }
-        Ext.getCmp('DNSMasqEntriesGridPanel').getColumnModel().setConfig(colConfig);
     }
 });
 
