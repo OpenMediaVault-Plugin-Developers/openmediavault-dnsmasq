@@ -23,6 +23,12 @@
  */
 // require("js/omv/WorkspaceManager.js")
 // require("js/omv/workspace/form/Panel.js")
+// require("js/omv/workspace/window/Form.js")
+// require("js/omv/data/Store.js")
+// require("js/omv/data/Model.js")
+// require("js/omv/data/proxy/Rpc.js")
+// require("js/omv/workspace/window/plugin/ConfigObject.js")
+// require("js/omv/form/field/SharedFolderComboBox.js")
 
 Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
     extend: "OMV.workspace.form.Panel",
@@ -113,20 +119,30 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 emptyText: _("Select a network ..."),
                 allowBlank: false,
                 allowNone: false,
-                width: 300,
                 editable: false,
                 triggerAction: "all",
                 displayField: "netid",
                 valueField: "netid",
-                store: new OMV.data.Store({
-                    remoteSort: false,
-                    proxy: new OMV.data.DataProxy({"service": "dnsmasq", "method": "getNetworks"}),
-                    reader: new Ext.data.JsonReader({
-                        idProperty: "netid",
-                        fields: [{
-                            name: "netid"
-                        }]
-                    })
+                store         : Ext.create("OMV.data.Store", {
+                    autoLoad : true,
+                    model    : OMV.data.Model.createImplicit({
+                        idProperty : "netid",
+                        fields     : [
+                            { name : "netid", type : "string" }
+                        ]
+                    }),
+                    proxy : {
+                        type : "rpc",
+                        rpcData : {
+                            service : "Dnsmasq",
+                            method  : "getNetworks"
+                        },
+                        appendSortParams : false
+                    },
+                    sorters : [{
+                        direction : "ASC",
+                        property  : "netid"
+                    }]
                 })
             },{
                 xtype: "textfield",

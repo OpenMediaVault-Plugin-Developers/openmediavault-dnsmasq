@@ -31,7 +31,7 @@ require_once("openmediavault/initscript.inc");
 require_once("openmediavault/log.inc");
 
 class OMVModuleDnsmasq extends OMVModuleServiceAbstract
-    implements OMVINotifyListener, OMVIModuleStatus {
+    implements OMVINotifyListener, OMVIModuleServiceStatus {
 
     /**
      * Get the module name.
@@ -56,9 +56,8 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
 
         // Restart samba enabling dnsmasq or enabling dns-wins
         // not sure how
-        if(FALSE === boolval($this->configGet("//services/dnsmasq/enable")) {
+        if(FALSE === boolval($this->configGet("//services/dnsmasq/enable")))
             return;
-        }
 
         $initd = new OMVSysVInitScript("dnsmasq", TRUE);
         $initd->restart();
@@ -178,7 +177,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
 
 // Register module
 $moduleMgr = &OMVModuleMgr::getInstance();
-$moduleMgr->registerModule(new dnsmasqModule());
+$moduleMgr->registerModule(new OMVModuleDnsmasq());
 
 // Register logging
 OMVLogFile::registerType("dnsmasq", array(

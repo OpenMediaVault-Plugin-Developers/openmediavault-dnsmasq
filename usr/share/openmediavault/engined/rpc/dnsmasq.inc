@@ -199,23 +199,20 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $ip = "";
 
         // This may not exist if DHCP is not enabled
-        if(FALSE === boolval($this->configGet("//services/dnsmasq/dhcp-enable")) {
+        if (FALSE === boolval($this->configGet("//services/dnsmasq/dhcp-enable")))
             return $leases;
-        }
 
         $fp = fopen("/var/lib/misc/dnsmasq.leases", "ro");
 
-        if ($fp === false) {
+        if ($fp === false)
             return $leases;
-        }
 
         while (! feof($fp)) {
 
             $line = trim(fgets($fp));
 
-            if (! $line) {
+            if (! $line)
                 continue;
-            }
 
             // Get list of values
             list($exp, $mac, $ip, $name) = preg_split('/\s+/', $line);
@@ -262,7 +259,6 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                 'disp' => $disp,
                 'exp'  => $exp
             );
-
         }
 
         usort($leases, function($a, $b) {
