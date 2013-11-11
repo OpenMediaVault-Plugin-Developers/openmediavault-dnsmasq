@@ -47,7 +47,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     check: this._updateFormFields,
                     scope: this
                 }
-            }, {
+            },{
                 xtype: "textfield",
                 name: "domain-name",
                 fieldLabel: _("Domain Name"),
@@ -59,7 +59,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     text: _("Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients.")
                 }]
             }]
-        }, {
+        },{
             xtype: "fieldset",
             title: "DNS Settings",
             defaults: {
@@ -67,13 +67,13 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
             },
             items: [{
                 html: _("The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server.<br /><br />")
-            }, {
+            },{
                 xtype: "checkbox",
                 name: "dns-log-queries",
                 fieldLabel: _("Log Queries"),
                 boxLabel: _("For debugging purposes, log each DNS query"),
                 checked: false
-            }, {
+            },{
                 xtype: "checkbox",
                 name: "dns-wins",
                 fieldLabel: _("Use WINS entries"),
@@ -84,7 +84,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     text: _("Requires that Enable WINS server is set in Services -> SMB/CIFS")
                 }]
             }]
-        }, {
+        },{
             xtype: "fieldset",
             title: _("DHCP Settings"),
             defaults: {

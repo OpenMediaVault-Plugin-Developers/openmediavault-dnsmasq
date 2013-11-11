@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-dnsmasq\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-11 15:41-0500\n"
+"POT-Creation-Date: 2013-11-11 16:06-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,4 +16,166 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+-e msgid "12 hours"
+msgstr "12 hours"
+
+-e msgid "1 day"
+msgstr "1 day"
+
+-e msgid "1 hour"
+msgstr "1 hour"
+
+-e msgid "1 week"
+msgstr "1 week"
+
+-e msgid "2 days"
+msgstr "2 days"
+
+-e msgid "3 hours"
+msgstr "3 hours"
+
+-e msgid "4 days"
+msgstr "4 days"
+
+-e msgid "6 hours"
+msgstr "6 hours"
+
+-e msgid "Add static entry"
+msgstr "Add static entry"
+
+-e msgid "Computer Name"
+msgstr "Computer Name"
+
+-e msgid "Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients."
+msgstr "Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients."
+
+-e msgid "DHCP Boot"
+msgstr "DHCP Boot"
+
+-e msgid "DHCP Settings"
+msgstr "DHCP Settings"
+
+-e msgid "DNS Search Domain(s)"
+msgstr "DNS Search Domain(s)"
+
+-e msgid "DNS Server(s)"
+msgstr "DNS Server(s)"
+
+-e msgid "Domain Name"
+msgstr "Domain Name"
+
+-e msgid "Edit static entry"
+msgstr "Edit static entry"
+
+-e msgid "Enable"
+msgstr "Enable"
+
+-e msgid "Expires"
+msgstr "Expires"
+
+-e msgid "Extra"
+msgstr "Extra"
+
+-e msgid "Extra options"
+msgstr "Extra options"
+
+-e msgid "Extra options for dnsmasq configuration file."
+msgstr "Extra options for dnsmasq configuration file."
+
+-e msgid "First IP address"
+msgstr "First IP address"
+
+-e msgid "For debugging purposes, log each DNS query"
+msgstr "For debugging purposes, log each DNS query"
+
+-e msgid "Gateway"
+msgstr "Gateway"
+
+-e msgid "General"
+msgstr "General"
+
+-e msgid "Host Name"
+msgstr "Host Name"
+
+-e msgid "If set, this file must exist on the TFTP share. Example: /pxelinux.0,0.0.0.0"
+msgstr "If set, this file must exist on the TFTP share. Example: /pxelinux.0,0.0.0.0"
+
+-e msgid "If this field is left blank, the host name will be obtained from the client's DHCP request. Beware that not all clients send their host name."
+msgstr "If this field is left blank, the host name will be obtained from the client's DHCP request. Beware that not all clients send their host name."
+
+-e msgid "IP Address"
+msgstr "IP Address"
+
+-e msgid "Last IP address"
+msgstr "Last IP address"
+
+-e msgid "Lease Network"
+msgstr "Lease Network"
+
+-e msgid "Leases"
+msgstr "Leases"
+
+-e msgid "Lease Time"
+msgstr "Lease Time"
+
+-e msgid "Local DNS/DHCP"
+msgstr "Local DNS/DHCP"
+
+-e msgid "Log DHCP"
+msgstr "Log DHCP"
+
+-e msgid "Log lots of extra information about DHCP transactions."
+msgstr "Log lots of extra information about DHCP transactions."
+
+-e msgid "Log Queries"
+msgstr "Log Queries"
+
+-e msgid "MAC Address"
+msgstr "MAC Address"
+
+-e msgid "NTP Server(s)"
+msgstr "NTP Server(s)"
+
+-e msgid "Other host names that should resolve to the specified IP address. Separate multiple entries with commas."
+msgstr "Other host names that should resolve to the specified IP address. Separate multiple entries with commas."
+
+-e msgid "Other Names"
+msgstr "Other Names"
+
+-e msgid "Requires that Enable WINS server is set in Services -> SMB/CIFS"
+msgstr "Requires that Enable WINS server is set in Services -> SMB/CIFS"
+
+-e msgid "Select a network ..."
+msgstr "Select a network ..."
+
+-e msgid "Select existing lease ..."
+msgstr "Select existing lease ..."
+
+-e msgid "Separate multiple entries with commas."
+msgstr "Separate multiple entries with commas."
+
+-e msgid "Settings"
+msgstr "Settings"
+
+-e msgid "Specifying a MAC Address and IP Address will create a static IP DHCP entry.<br /><br />Entering all fields will create an all-in-one static ip reservation and DNS entry.<br /><br />"
+msgstr "Specifying a MAC Address and IP Address will create a static IP DHCP entry.<br /><br />Entering all fields will create an all-in-one static ip reservation and DNS entry.<br /><br />"
+
+-e msgid "Static Entries"
+msgstr "Static Entries"
+
+-e msgid "The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server.<br /><br />"
+msgstr "The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server.<br /><br />"
+
+-e msgid "To create a DNS entry, specify IP address and Host Name. Optionally, you may enter other names which  the host should be known as.<br /><br />"
+msgstr "To create a DNS entry, specify IP address and Host Name. Optionally, you may enter other names which  the host should be known as.<br /><br />"
+
+-e msgid "Use IP / name entries obtained through WINS server."
+msgstr "Use IP / name entries obtained through WINS server."
+
+-e msgid "Use WINS entries"
+msgstr "Use WINS entries"
+
+-e msgid "WINS Server(s)"
+msgstr "WINS Server(s)"
 

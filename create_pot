@@ -5,7 +5,7 @@ mkdir -p ${POT_DIR}
 pwd=${PWD##*/}
 edit_date=$(date +%Y-%m-%d\ %H:%M)
 
-grep -Poh '(?<=\_\(\").*?(?=\"\))' ./var/www/openmediavault/js/omv/module/admin/system/omvextrasorg/*.js | sort -u > strings
+grep -Poh '(?<=\_\(\").*?(?=\"\))' ./var/www/openmediavault/js/omv/module/admin/service/dnsmasq/*.js | sort -u > strings
 
 cat strings* | sort -u > pot_strings
 
