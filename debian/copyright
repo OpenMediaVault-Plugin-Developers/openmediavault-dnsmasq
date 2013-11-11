@@ -1,6 +1,7 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Contact: Marcel Beck <marcel.beck@mbeck.org>
+Upstream-Contact: OpenMediaVault Plugin Developers <plugins@omv-extras.org>
 Source: https://github.com/OMV-Plugins/openmediavault-dnsmasq
-Copyright: 2012 Marcel Beck <marcel.beck@mbeck.org> 
+Copyright: 2013 OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+ 2012 Marcel Beck <marcel.beck@mbeck.org> 
  2011,2012 Ian Moore <imooreyahoo@gmail.com>
 License: GPL-3
