@@ -1,0 +1,217 @@
+#!/bin/sh
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Ian Moore <imooreyahoo@gmail.com>
+# @copyright Copyright (c) 2011 Ian Moore
+#
+# This file is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This file is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this file. If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+
+DEFAULTS="/etc/default/dnsmasq"
+CONFIG="/etc/dnsmasq.d/omv.conf"
+
+# Enable/disable service
+if [ "$(omv_config_get "//services/dnsmasq/enable")" != "1" ]; then
+	/etc/init.d/dnsmasq stop || true
+	update-rc.d dnsmasq disable 2>/dev/null || true
+fi
+
+DOMAIN="$(omv_config_get "//services/dnsmasq/domain-name")"
+
+################
+# Defaults file
+################
+cat <<EOF >${DEFAULTS}
+# This file has five functions:
+# 1) to completely disable starting dnsmasq,
+# 2) to set DOMAIN_SUFFIX by running `dnsdomainname`
+# 3) to select an alternative config file
+#    by setting DNSMASQ_OPTS to --conf-file=<file>
+# 4) to tell dnsmasq to read the files in /etc/dnsmasq.d for
+#    more configuration variables.
+# 5) to stop the resolvconf package from controlling dnsmasq's
+#    idea of which upstream nameservers to use.
+# For upgraders from very old versions, all the shell variables set
+# here in previous versions are still honored by the init script
+# so if you just keep your old version of this file nothing will break.
+
+DOMAIN_SUFFIX="${DOMAIN}"
+DNSMASQ_OPTS="-h -H /etc/dnsmasq-winshosts -H /etc/dnsmasq-hosts"
+
+# Whether or not to run the dnsmasq daemon; set to 0 to disable.
+ENABLED=$(omv_config_get "//services/dnsmasq/enable")
+
+# By default search this drop directory for configuration options.
+# Libvirt leaves a file here to make the system dnsmasq play nice.
+# Comment out this line if you don't want this. The dpkg-* are file
+# endings which cause dnsmasq to skip that file. This avoids pulling
+# in backups made by dpkg.
+CONFIG_DIR=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new
+
+# If the resolvconf package is installed, dnsmasq will use its output
+# rather than the contents of /etc/resolv.conf to find upstream
+# nameservers. Uncommenting this line inhibits this behaviour.
+# Not that including a "resolv-file=<filename>" line in
+# /etc/dnsmasq.conf is not enough to override resolvconf if it is
+# installed: the line below must be uncommented.
+#IGNORE_RESOLVCONF=yes
+
+EOF
+
+# Nothing more to do
+if [ "$(omv_config_get "//services/dnsmasq/enable")" != "1" ]; then
+	exit 0
+fi
+
+
+############################
+# Configuration file
+############################
+cat <<EOF >${CONFIG}
+# Configuration file for dnsmasq.
+
+# By  default,  dnsmasq  will  send queries to any of the upstream
+# servers it knows about and tries to favour servers to are  known
+# to  be  up.  Uncommenting this forces dnsmasq to try each query
+# with  each  server  strictly  in  the  order  they   appear   in
+# /etc/resolv.conf
+strict-order
+
+# Add local-only domains here, queries in these domains are answered
+# from /etc/hosts or DHCP only.
+local=/${DOMAIN}/
+
+# Set this (and domain: see below) if you want to have a domain
+# automatically added to simple names in a hosts-file.
+expand-hosts
+
+# Set the domain for dnsmasq. this is optional, but if it is set, it
+# does the following things.
+# 1) Allows DHCP hosts to have fully qualified domain names, as long
+#     as the domain part matches this setting.
+# 2) Sets the "domain" DHCP option thereby potentially setting the
+#    domain of all systems configured by DHCP
+# 3) Provides the domain part for "expand-hosts"
+domain=${DOMAIN}
+
+EOF
+
+# DNS logging and extra options
+xmlstarlet sel -t -m "//services/dnsmasq" \
+    -i "dns-log-queries != 0" -o "log-queries" -n -b \
+    -i "extraoptions != ''" -o "# Extra options" -n \
+    -v "extraoptions" -n -b \
+    -o "" -n \
+    ${OMV_CONFIG_FILE} >> ${CONFIG}
+
+###############################
+# DHCP options
+###############################\
+MASK="$(omv_config_get "//services/dnsmasq/network" | awk '{ print $NF }')"
+if [ "$(omv_config_get "//services/dnsmasq/dhcp-enable")" = "1" ]; then
+
+	xmlstarlet sel -t -m "//services/dnsmasq" \
+		-v "concat('dhcp-range=', first-ip, ',', last-ip, ',${MASK},', default-lease-time)" -n \
+		-i "bootfile != ''" -v "concat('dhcp-boot=', bootfile)" -n -b \
+		-i "log-dhcp != 0" -o "log-dhcp" -n -b \
+		-v "concat('dhcp-option=option:router,',gateway)" -n \
+		-o "dhcp-hostsfile=/etc/dnsmasq-dhcphosts" -n \
+		-n ${OMV_CONFIG_FILE} | xmlstarlet unesc >> ${CONFIG}
+
+	# DHCP Server options
+	DNSDOMAINS=$(omv_config_get "//services/dnsmasq/dns-domains" | sed -e 's/\s*,\s*/,/g');
+	WINS=$(omv_config_get "//services/dnsmasq/wins-servers" | sed -e 's/\s*,\s*/,/g');
+	NTP=$(omv_config_get "//services/dnsmasq/ntp-servers" | sed -e 's/\s*,\s*/,/g');
+	DNS=$(omv_config_get "//services/dnsmasq/dns-servers" | sed -e 's/\s*,\s*/,/g');
+
+	[ "${DNSDOMAINS}" != "" ] && echo "dhcp-option=option:domain-search,${DNSDOMAINS}" >> ${CONFIG}
+	[ "${DOMAIN}" != "" ] && echo "dhcp-option=15,\"$(echo ${DOMAIN} | sed -e 's/,/ /g')\"" >> ${CONFIG}
+	[ "${WINS}" != "" ] && echo "dhcp-option=44,${WINS}" >> ${CONFIG}
+	[ "${NTP}" != "" ] && echo "dhcp-option=option:ntp-server,${NTP}" >> ${CONFIG}
+	[ "${DNS}" != "" ] && echo "dhcp-option=6,${DNS}" >> ${CONFIG}
+
+fi
+
+
+DNSHOSTS="/etc/dnsmasq-hosts"
+TMPDNSHOSTS="/tmp/dnsmasq-hosts.$$"
+
+DHCPHOSTS="/etc/dnsmasq-dhcphosts"
+TMPDHCPHOSTS="/tmp/dnsmasq-dhcphosts.$$"
+
+if [ -e "${TMPDNSHOSTS}" ]; then
+	echo "${TMPDNSHOSTS} already exists"
+	exit 1
+fi
+
+echo ''>${TMPDNSHOSTS}
+
+DHCPENABLE=$(omv_config_get "//services/dnsmasq/dhcp-enable")
+if [ "${DHCPENABLE}" = "1" ]; then
+	if [ -e "${TMPDHCPHOSTS}" ]; then
+		echo "${TMPDHCPHOSTS} already exists"
+		exit 1
+	fi
+	echo ''>${TMPDHCPHOSTS}
+fi
+
+# Entries
+index=$(omv_config_get_count "//services/dnsmasq/entries/entry")
+while [ ${index} -gt 0 ]
+do
+
+	# DNS HOSTS FILE
+	xmlstarlet sel -t -m "//services/dnsmasq/entries/entry[position()=${index}]" \
+		-i "name != ''" -i "ip != ''" -v "concat(ip,'	',name)" -b \
+		${OMV_CONFIG_FILE} >> ${TMPDNSHOSTS}
+
+	# CNAMES
+	CHOST=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/name")
+	if [ "${CHOST}" != "" ]; then
+		CNAMES=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/cnames" | sed -e 's/\s*,\s*/\n/g')
+		for cname in $CNAMES; do
+			echo "cname=${cname},${CHOST}" >> ${CONFIG}
+			echo "cname=${cname}.${DOMAIN},${CHOST}.${DOMAIN}" >> ${CONFIG}
+		done
+	fi
+
+	# DHCP FILE
+	if [ "${DHCPENABLE}" = "1" ]; then
+		MAC=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/mac")
+		if [ "${MAC}" != "" ]; then
+			xmlstarlet sel -t -m "//services/dnsmasq/entries/entry[position()=${index}]" \
+				-i "mac != ''" -i "ip != ''" -v "concat(mac, ',', ip)" -b \
+				${OMV_CONFIG_FILE} >> ${TMPDHCPHOSTS}
+		fi
+	fi
+
+	index=$(( ${index} - 1 ))
+done
+
+/bin/mv ${TMPDNSHOSTS} ${DNSHOSTS}
+[ "${DHCPENABLE}" = "1" ] && /bin/mv ${TMPDHCPHOSTS} ${DHCPHOSTS}
+
+# If wins support isn't enabled, clear hosts file
+# if it doesn't exist, create it
+if [ $(omv_config_get "//services/dnsmasq/dns-wins") != "1" ] || [ ! -e /etc/dnsmasq-winshosts ]; then
+	echo ''>/etc/dnsmasq-winshosts
+fi
+
+update-rc.d dnsmasq enable
+update-rc.d dnsmasq defaults 2>/dev/null

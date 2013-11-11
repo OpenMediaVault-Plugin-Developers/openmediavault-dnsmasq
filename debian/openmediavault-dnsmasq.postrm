@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# This file is part of OpenMediaVault-dnsmasq.
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Marcel Beck <marcel.beck@mbeck.org>
+# @copyright Copyright (c) 2012 Marcel Beck
+#
+# OpenMediaVault is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# OpenMediaVault is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with OpenMediaVault. If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+if [ "$1" = "purge" ]; then
+
+	if [ -e /etc/dnsmasq-dhcphosts ]; then
+		/bin/rm /etc/dnsmasq-dhcphosts
+	fi
+	
+	if [ -e /etc/dnsmasq-hosts ]; then
+		/bin/rm /etc/dnsmasq-hosts
+	fi	
+	
+	if [ -e /etc/dnsmasq-winshosts ]; then
+		/bin/rm /etc/dnsmasq-winshosts
+	fi
+	
+	if [ -e /etc/dnsmasq.d/omv.conf ]; then
+		/bin/rm /etc/dnsmasq.d/omv.conf
+	fi
+	
+	if [ -e /etc/default/dnsmasq-orig ]; then
+		/bin/mv /etc/default/dnsmasq-orig /etc/default/dnsmasq
+	fi
+		
+fi
+
+#DEBHELPER#
+
+exit 0

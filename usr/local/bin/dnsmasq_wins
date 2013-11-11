@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Ian Moore <imooreyahoo@gmail.com>
+# @copyright Copyright (c) 2011 Ian Moore
+#
+# This file is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This file is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this file. If not, see <http://www.gnu.org/licenses/>.
+
+# Update wins file from samba wins database
+# Do not allow wins entries to override static entries
+
+if [ -e "/var/lib/samba/wins.dat" ]; then
+
+	WINSHOSTSTMP="/tmp/winshosts.$$"
+
+	if [ -e "$WINSHOSTSTMP" ]; then
+		echo $WINSHOSTSTMP already exists. Exiting...
+		exit 11
+	fi
+
+	echo ''>${WINSHOSTSTMP}
+
+	WINSHOSTS=""
+
+	for I in $(cat /var/lib/samba/wins.dat | awk '{ print $3, $1 }' | sed -e s'/#.*"//' | sed -e 's/"//' | tr '[A-Z]' '[a-z]' | grep -v '^0' | sed -e 's/ /$/' | sort -u); do
+
+		IP=`echo $I | awk -F\$ '{ print $1 }'`
+		HOST=`echo $I | awk -F\$ '{ print $2 }'`
+
+		# Must be valid
+		if [ "$IP" = "" ] || [ "$HOST" = "" ]; then
+			continue
+		fi
+
+		# check for IP in hosts file
+		if [ `grep -c "^$IP\\s" /etc/dnsmasq-hosts` -gt 0 ]; then
+			continue
+		fi
+
+		# check for hostname in hosts file
+		if [ `grep -c "\\s$HOST\$" /etc/dnsmasq-hosts` -gt 0 ]; then
+			continue
+		fi
+
+		echo "$IP\t$HOST" >>${WINSHOSTSTMP}
+
+	done
+
+	/bin/mv ${WINSHOSTSTMP} /etc/dnsmasq-winshosts
+
+else
+
+	echo >/etc/dnsmasq-winshosts
+
+fi
+
