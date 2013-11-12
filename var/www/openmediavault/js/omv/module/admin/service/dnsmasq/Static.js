@@ -43,7 +43,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entries", {
     ],
 
     hidePagingToolbar: false,
-    disabled: true,
     id: 'DNSMasqEntriesGridPanel',
     stateful: true,
     stateId: "9889057b-b2c0-4c48-a4c1-8c9b4fb54d7b",
@@ -127,7 +126,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entries", {
             callback: me.onDeletion,
             rpcData: {
                 service: "Dnsmasq",
-                method: "removeEntry",
+                method: "deleteEntry",
                 params: {
                     uuid: record.get("uuid")
                 }
@@ -151,27 +150,26 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
 
     getFormItems: function () {
         return [{
+            border: false,
             html: _("To create a DNS entry, specify IP address and Host Name. Optionally, you may enter other names which  the host should be known as.<br /><br />")
         },{
-            hidden: Ext.getCmp('DNSMasqLeasesGridPanel').disabled,
+            border: false,
             html: _("Specifying a MAC Address and IP Address will create a static IP DHCP entry.<br /><br />Entering all fields will create an all-in-one static ip reservation and DNS entry.<br /><br />")
         },{
             xtype: "textfield",
             name: "name",
-            vtype: "dnsmasqhostname",
             itemId: "name",
             fieldLabel: _("Host Name"),
-            allowBlank: (!Ext.getCmp('DNSMasqLeasesGridPanel').disabled),
+            allowBlank: true,
             plugins: [{
                 ptype: "fieldinfo",
-                text: (Ext.getCmp('DNSMasqLeasesGridPanel').disabled ? '' : _("If this field is left blank, the host name will be obtained from the client's DHCP request. Beware that not all clients send their host name."))
+                text: _("If this field is left blank, the host name will be obtained from the client's DHCP request. Beware that not all clients send their host name.")
             }]
         },{
             xtype: "textfield",
             name: "cnames",
             fieldLabel: _("Other Names"),
             allowBlank: true,
-            vtype: "dnsmasqcnames",
             plugins: [{
                 ptype: "fieldinfo",
                 text: _("Other host names that should resolve to the specified IP address. Separate multiple entries with commas.")
@@ -179,24 +177,17 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
         },{
             xtype: "textfield",
             name: "ip",
-            itemId: 'ip',
-            vtype: "IPv4Net",
             fieldLabel: _("IP Address"),
             allowBlank: false
         },{
             xtype: "textfield",
             name: "mac",
-            itemId: "mac",
-            id: this.getId() + '-mac',
             fieldLabel: _("MAC Address"),
-            allowBlank: true,
-            hidden: Ext.getCmp('DNSMasqLeasesGridPanel').disabled
+            allowBlank: true
         },{
             xtype: "combo",
             name: "exlease",
-            submitValue: false,
-            hidden: (this.uuid !== OMV.UUID_UNDEFINED || Ext.getCmp('DNSMasqLeasesGridPanel').disabled),
-            fieldLabel: "",
+            fieldLabel: "Lease",
             emptyText: _("Select existing lease ..."),
             allowBlank: true,
             allowNone: true,
@@ -204,25 +195,29 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
             triggerAction: "all",
             displayField: "disp",
             valueField: "mac",
-            listeners: {
-                select: function (a, b, c) {
-                    this.ownerCt.getComponent('ip').setValue(b.data.ip);
-                    this.ownerCt.getComponent('mac').setValue(b.data.mac);
-                    this.ownerCt.getComponent('name').setValue(b.data.name);
-                }
-            },
-            store: new OMV.data.Store({
-                remoteSort: false,
-                proxy: new OMV.data.DataProxy({"service":"dnsmasq", "method":"getLeases"}),
-                reader: new Ext.data.JsonReader({
-                    idProperty: "mac",
-                    fields: [
-                        { name:"ip" },
-                        { name:"mac" },
-                        { name:"name" },
-                        { name:"disp" }
+            store : Ext.create("OMV.data.Store", {
+                autoLoad : true,
+                model    : OMV.data.Model.createImplicit({
+                    idProperty : "mac",
+                    fields     : [
+                        { name : "ip", type : "string" },
+                        { name : "mac", type : "string" },
+                        { name : "name", type : "string" },
+                        { name : "disp", type : "string" }
                     ]
-                })
+                }),
+                proxy : {
+                    type : "rpc",
+                    rpcData : {
+                        service : "Dnsmasq",
+                        method  : "getLeases"
+                    },
+                    appendSortParams : false
+                },
+                sorters : [{
+                    direction : "ASC",
+                    property  : "mac"
+                }]
             })
         }];
     }

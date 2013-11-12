@@ -41,9 +41,9 @@ Ext.define("OMV.module.admin.service.dnsmasq.Leases", {
     ],
 
     hidePagingToolbar: false,
-    hideAdd: true,
-    hideEdit: true,
-    hideDelete: true,
+	hideAddButton: true,
+	hideEditButton: true,
+	hideDeleteButton: true,
     stateful: true,
     stateId: "9876057b-b2c0-4c48-a4c1-8c9b4fb54d7b",
     columns:[{

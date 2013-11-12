@@ -46,7 +46,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
     public function initialize() {
         $this->registerMethod("getSettings");
         $this->registerMethod("setSettings");
-        $this->registerMethod("getLeaseList");
+        $this->registerMethod("getLeases");
         $this->registerMethod("getNetworks");
         $this->registerMethod("getEntries");
         $this->registerMethod("getEntry");
@@ -176,8 +176,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
      *
      * @return array list of leases
      */
-    public function getLeaseList($params, $context) {
-
+     public function getLeases($params, $context) {
+        global $xmlConfig;
+        
         // Validate the RPC caller context.
         $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
 
@@ -198,8 +199,10 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $mac = "";
         $ip = "";
 
+        $ints = $xmlConfig->getList("//system/network/interfaces/iface");
+        
         // This may not exist if DHCP is not enabled
-        if (FALSE === boolval($this->configGet("//services/dnsmasq/dhcp-enable")))
+        if (FALSE === $xmlConfig->get("//services/dnsmasq/dhcp-enable"))
             return $leases;
 
         $fp = fopen("/var/lib/misc/dnsmasq.leases", "ro");
@@ -276,17 +279,17 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
      * @return array networks
      */
     public function getNetworks($params, $context) {
+        global $xmlConfig;
 
         // Validate the RPC caller context.
         $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
 
         $nets = array();
-        $ints = $this->configGetList("//system/network/interfaces/iface");
+        $ints = $xmlConfig->getList("//system/network/interfaces/iface");
 
         foreach ($ints as $i) {
-            if (! ($i['netmask'] && $i['address'])) {
+            if (! ($i['netmask'] && $i['address']))
                 continue;
-            }
 
             $netid = long2ip(ip2long($i['address']) & ip2long($i['netmask'])) . " / {$i['netmask']}";
             $nets[$netid] = $netid;
@@ -406,9 +409,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $success = FALSE;
 
         // Check uniqueness
-        if (! empty($object['name']) && TRUE === $this->configExists("//services/dnsmasq/entries/entry[name='{$object['name']}']")) {
+        if (! empty($object['name']) && TRUE === $xmlConfig->exists("//services/dnsmasq/entries/entry[name='{$object['name']}']")) {
 
-            $ex = $this->configGet("//services/dnsmasq/entries/entry[name='{$object['name']}']");
+            $ex = $xmlConfig->get("//services/dnsmasq/entries/entry[name='{$object['name']}']");
 
             if ($ex['uuid'] != $object['uuid'] && $ex['ip'] == $data['ip']) {
                 throw new OMVException(OMVErrorMsg::E_CONFIG_OBJECT_UNIQUENESS);
@@ -416,9 +419,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         }
 
         // Check uniqueness
-        if (! empty($data['mac']) && TRUE === $this->configExists("//services/dnsmasq/entries/entry[ip='{$object['ip']}']")) {
+        if (! empty($data['mac']) && TRUE === $xmlConfig->exists("//services/dnsmasq/entries/entry[ip='{$object['ip']}']")) {
 
-            $ex = $this->configGet("//services/dnsmasq/entries/entry[ip='{$object['ip']}']");
+            $ex = $xmlConfig->get("//services/dnsmasq/entries/entry[ip='{$object['ip']}']");
 
             if ($ex['uuid'] != $object['uuid'] && $ex['mac'] == $data['mac']) {
                 throw new OMVException(OMVErrorMsg::E_CONFIG_OBJECT_UNIQUENESS);
@@ -436,7 +439,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             {
                 // check for exact name
                 try {
-                    $ex = $this->configGet("//services/dnsmasq/entries/entry[name='{$cname}']");
+                    $ex = $xmlConfig->get("//services/dnsmasq/entries/entry[name='{$cname}']");
                 } catch (Exception $e) {
                     // ignore
                     $ex = null;
@@ -446,7 +449,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                     throw new Exception("An entry with the host name (or other names) '{$cname}' already exists.");
                 }
 
-                $exnames = $this->configGetList("//services/dnsmasq/entries/entry[contains(cnames, '{$cname}')]");
+                $exnames = $xmlConfig->getList("//services/dnsmasq/entries/entry[contains(cnames, '{$cname}')]");
 
                 foreach ($exnames as $ex) {
                     // Skip ourselves
@@ -514,5 +517,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         return $object;
     }
 }
+
+// Register the RPC service.
+$rpcServiceMgr = &OMVRpcServiceMgr::getInstance();
+$rpcServiceMgr->registerService(new OMVRpcServiceDnsmasq());
 
 ?>

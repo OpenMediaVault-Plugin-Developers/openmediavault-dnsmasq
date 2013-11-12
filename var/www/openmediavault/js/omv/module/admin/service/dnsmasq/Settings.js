@@ -28,7 +28,6 @@
 // require("js/omv/data/Model.js")
 // require("js/omv/data/proxy/Rpc.js")
 // require("js/omv/workspace/window/plugin/ConfigObject.js")
-// require("js/omv/form/field/SharedFolderComboBox.js")
 
 Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
     extend: "OMV.workspace.form.Panel",
@@ -48,18 +47,13 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 xtype: "checkbox",
                 name: "enable",
                 fieldLabel: _("Enable"),
-                checked: false,
-                listeners: {
-                    check: this._updateFormFields,
-                    scope: this
-                }
+                checked: false
             },{
                 xtype: "textfield",
                 name: "domain-name",
                 fieldLabel: _("Domain Name"),
                 allowBlank: true,
                 value: "local",
-                width: 200,
                 plugins: [{
                     ptype: "fieldinfo",
                     text: _("Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients.")
@@ -100,11 +94,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 xtype: "checkbox",
                 name: "dhcp-enable",
                 fieldLabel: _("Enable"),
-                checked: false,
-                listeners: {
-                    check: this._updateFormFields,
-                    scope: this
-                }
+                checked: false
             },{
                 xtype: "checkbox",
                 name: "log-dhcp",
@@ -193,7 +183,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 name: "dns-domains",
                 fieldLabel: _("DNS Search Domain(s)"),
                 allowBlank: true,
-                width: 300,
                 value: "",
                 plugins: [{
                     ptype: "fieldinfo",
@@ -204,7 +193,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 name: "wins-servers",
                 fieldLabel: _("WINS Server(s)"),
                 allowBlank: true,
-                width: 300,
                 value: "",
                 plugins: [{
                     ptype: "fieldinfo",
@@ -215,7 +203,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 name: "ntp-servers",
                 fieldLabel: _("NTP Server(s)"),
                 allowBlank: true,
-                width: 300,
                 value: "",
                 plugins: [{
                     ptype: "fieldinfo",
@@ -226,7 +213,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 name: "dns-servers",
                 fieldLabel: _("DNS Server(s)"),
                 allowBlank: true,
-                width: 300,
                 value: "",
                 plugins: [{
                     ptype: "fieldinfo",
@@ -237,7 +223,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 name: "bootfile",
                 fieldLabel: _("DHCP Boot"),
                 allowBlank: true,
-                width: 300,
                 value: "",
                 plugins: [{
                     ptype: "fieldinfo",
@@ -251,20 +236,14 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 labelSeparator: ""
             },
             items: [{
-                xtype: "textfield",
-                name: "extraoptions",
-                fieldLabel: _("Extra options"),
-                allowBlank: true,
-                autoCreate: {
-                    tag: "textarea",
-                    autocomplete: "off",
-                    rows: "5",
-                    cols: "80"
-                },
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Extra options for dnsmasq configuration file.")
-                }]
+				xtype: "textarea",
+				name: "extraoptions",
+				fieldLabel: _("Extra options"),
+				allowBlank: true,
+				plugins: [{
+					ptype: "fieldinfo",
+					text: _("Extra options for dnsmasq configuration file."),
+				}]
             }]
         }];
     }
