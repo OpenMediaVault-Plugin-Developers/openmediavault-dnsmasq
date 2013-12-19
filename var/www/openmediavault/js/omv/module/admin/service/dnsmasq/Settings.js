@@ -42,7 +42,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
             ],
             conditions : [{
                 name  : "dhcp-enable",
-                value : true
+                value : false
             }],
             properties : "allowBlank"
         }]
@@ -107,7 +107,10 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 labelSeparator : ""
             },
             items    : [{
-                html  : _("The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server." ) + "<br /><br />"
+                border : false,
+                html   : "<p>" +
+                         _("The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server." ) + 
+                         "</p>"
             },{
                 xtype      : "checkbox",
                 name       : "dns-log-queries",
