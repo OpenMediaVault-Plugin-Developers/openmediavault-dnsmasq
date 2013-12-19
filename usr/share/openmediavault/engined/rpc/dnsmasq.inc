@@ -121,13 +121,6 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             }
         }');
 
-        // Get the existing configuration object.
-        $xpath = "//services/dnsmasq";
-        $oldObject = $xmlConfig->get($xpath);
-        if(is_null($oldObject)) {
-            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-        }
-
         // Update the configuration object.
         $object = array(
             "enable"                => array_boolval($params, 'enable'),
