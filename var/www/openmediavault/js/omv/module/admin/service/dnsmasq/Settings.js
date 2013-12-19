@@ -19,7 +19,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this file. If not, see <http://www.gnu.org/licenses/>.
- *
  */
 // require("js/omv/WorkspaceManager.js")
 // require("js/omv/workspace/form/Panel.js")
@@ -30,94 +29,136 @@
 // require("js/omv/workspace/window/plugin/ConfigObject.js")
 
 Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
-    extend: "OMV.workspace.form.Panel",
+    extend : "OMV.workspace.form.Panel",
 
-    rpcService: "Dnsmasq",
-    rpcGetMethod: "getSettings",
-    rpcSetMethod: "setSettings",
+    plugins : [{
+        ptype        : "linkedfields",
+        correlations : [{
+            name       : [
+                "network",
+                "gateway",
+                "first-ip",
+                "last-ip"
+            ],
+            conditions : [{
+                name  : "dhcp-enable",
+                value : true
+            }],
+            properties : "allowBlank"
+        }]
+    }],
+
+    initComponent : function () {
+        var me = this;
+
+        me.on('load', function () {
+            var checked = me.findField('enable').checked;
+            var dchecked = me.findField('dhcp-enable').checked;
+            var parent = me.up('tabpanel');
+
+            if (!parent)
+                return;
+
+            var staticPanel = parent.down('panel[title=' + _("Static Entries") + ']');
+            var leasesPanel = parent.down('panel[title=' + _("Leases") + ']');
+
+            if (staticPanel) {
+                checked ? staticPanel.enable() : staticPanel.disable();
+            }
+            if (leasesPanel) {
+                dchecked ? leasesPanel.enable() : leasesPanel.disable();
+            }
+        });
+
+        me.callParent(arguments);
+    },
+
+    rpcService   : "Dnsmasq",
+    rpcGetMethod : "getSettings",
+    rpcSetMethod : "setSettings",
 
     getFormItems: function () {
         return [{
-            xtype: "fieldset",
-            title: _("General"),
-            defaults: {
-                labelSeparator: ""
+            xtype    : "fieldset",
+            title    : _("General"),
+            defaults : {
+                labelSeparator : ""
             },
-            items: [{
-                xtype: "checkbox",
-                name: "enable",
-                fieldLabel: _("Enable"),
-                checked: false
+            items    : [{
+                xtype      : "checkbox",
+                name       : "enable",
+                fieldLabel : _("Enable"),
+                checked    : false
             },{
-                xtype: "textfield",
-                name: "domain-name",
-                fieldLabel: _("Domain Name"),
-                allowBlank: true,
-                value: "local",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients.")
+                xtype      : "textfield",
+                name       : "domain-name",
+                fieldLabel : _("Domain Name"),
+                allowBlank : true,
+                value      : "local",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Configures local DNS entries to contain the domain name above. Also sets the domain for DHCP clients.")
                 }]
             }]
         },{
-            xtype: "fieldset",
-            title: "DNS Settings",
-            defaults: {
-                labelSeparator: ""
+            xtype    : "fieldset",
+            title    : _("DNS Settings"),
+            defaults : {
+                labelSeparator : ""
             },
-            items: [{
-                html: _("The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server.<br /><br />")
+            items    : [{
+                html  : _("The local DNS server will respond to DNS queries for the hosts specified on the Static Entries tab, (optionally) hosts learned through OpenMediaVault's WINS server, and (optionally) DHCP clients that send their host name in DHCP requests. DNS requests for unknown hosts are forwarded to the OpenMediaVault's DNS servers as configured in System -> Network -> DNS Server." ) + "<br /><br />"
             },{
-                xtype: "checkbox",
-                name: "dns-log-queries",
-                fieldLabel: _("Log Queries"),
-                boxLabel: _("For debugging purposes, log each DNS query"),
-                checked: false
+                xtype      : "checkbox",
+                name       : "dns-log-queries",
+                fieldLabel : _("Log Queries"),
+                boxLabel   : _("For debugging purposes, log each DNS query"),
+                checked    : false
             },{
-                xtype: "checkbox",
-                name: "dns-wins",
-                fieldLabel: _("Use WINS entries"),
-                boxLabel: _("Use IP / name entries obtained through WINS server."),
-                checked: false,
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Requires that Enable WINS server is set in Services -> SMB/CIFS")
+                xtype      : "checkbox",
+                name       : "dns-wins",
+                fieldLabel : _("Use WINS entries"),
+                boxLabel   : _("Use IP / name entries obtained through WINS server."),
+                checked    : false,
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Requires that Enable WINS server is set in Services -> SMB/CIFS")
                 }]
             }]
         },{
-            xtype: "fieldset",
-            title: _("DHCP Settings"),
-            defaults: {
-                labelSeparator: ""
+            xtype    : "fieldset",
+            title    : _("DHCP Settings"),
+            defaults : {
+                labelSeparator : ""
             },
-            items: [{
-                xtype: "checkbox",
-                name: "dhcp-enable",
-                fieldLabel: _("Enable"),
-                checked: false
+            items    : [{
+                xtype      : "checkbox",
+                name       : "dhcp-enable",
+                fieldLabel : _("Enable"),
+                checked    : false
             },{
-                xtype: "checkbox",
-                name: "log-dhcp",
-                fieldLabel: _("Log DHCP"),
-                boxLabel: _("Log lots of extra information about DHCP transactions."),
-                checked: false
+                xtype      : "checkbox",
+                name       : "log-dhcp",
+                fieldLabel : _("Log DHCP"),
+                boxLabel   : _("Log lots of extra information about DHCP transactions."),
+                checked    : false
             },{
-                xtype: "combo",
-                name: "network",
-                hiddenName: "network",
-                fieldLabel: _("Lease Network"),
-                emptyText: _("Select a network ..."),
-                allowBlank: false,
-                allowNone: false,
-                editable: false,
-                triggerAction: "all",
-                displayField: "netid",
-                valueField: "netid",
+                xtype         : "combo",
+                name          : "network",
+                hiddenName    : "network",
+                fieldLabel    : _("Lease Network"),
+                emptyText     : _("Select a network ..."),
+                allowBlank    : false,
+                allowNone     : false,
+                editable      : false,
+                triggerAction : "all",
+                displayField  : "netid",
+                valueField    : "netid",
                 store         : Ext.create("OMV.data.Store", {
                     autoLoad : true,
                     model    : OMV.data.Model.createImplicit({
-                        idProperty : "netid",
-                        fields     : [
+                        idProperty  : "netid",
+                        fields      : [
                             { name : "netid", type : "string" }
                         ]
                     }),
@@ -135,124 +176,125 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                     }]
                 })
             },{
-                xtype: "textfield",
-                name: "gateway",
-                fieldLabel: _("Gateway"),
-                vtype: "IPv4",
-                allowBlank: true,
-                value: ""
+                xtype      : "textfield",
+                name       : "gateway",
+                fieldLabel : _("Gateway"),
+                vtype      : "IPv4",
+                allowBlank : true,
+                value      : ""
             },{
-                xtype: "textfield",
-                name: "first-ip",
-                fieldLabel: _("First IP address"),
-                vtype: "IPv4",
-                allowBlank: true,
-                value: ""
+                xtype      : "textfield",
+                name       : "first-ip",
+                fieldLabel : _("First IP address"),
+                vtype      : "IPv4",
+                allowBlank : true,
+                value      : ""
             },{
-                xtype: "textfield",
-                name: "last-ip",
-                vtype: "IPv4",
-                fieldLabel: _("Last IP address"),
-                allowBlank: true,
-                value: ""
+                xtype      : "textfield",
+                name       : "last-ip",
+                vtype      : "IPv4",
+                fieldLabel : _("Last IP address"),
+                allowBlank : true,
+                value      : ""
             },{
-                xtype: "combo",
-                name: "default-lease-time",
-                fieldLabel: _("Lease Time"),
-                allowBlank: false,
-                displayField: "text",
-                valueField: "value",
-                value: "24h",
-                triggerAction: "all",
-                mode: "local",
-                store: new Ext.data.SimpleStore({
-                    fields: [ "value", "text" ],
-                    data: [
-                        ["1h", _("1 hour")],
-                        ["3h", _("3 hours")],
-                        ["6h", _("6 hours")],
-                        ["12h", _("12 hours")],
-                        ["24h", _("1 day")],
-                        ["48h", _("2 days")],
-                        ["96h", _("4 days")],
-                        ["168h", _("1 week")]
+                xtype         : "combo",
+                name          : "default-lease-time",
+                fieldLabel    : _("Lease Time"),
+                allowBlank    : false,
+                displayField  : "text",
+                valueField    : "value",
+                value         : "24h",
+                triggerAction : "all",
+                mode          : "local",
+                store         : new Ext.data.SimpleStore({
+                    fields : [ "value", "text" ],
+                    data   : [
+                        [ "1h", _("1 hour") ],
+                        [ "3h", _("3 hours") ],
+                        [ "6h", _("6 hours") ],
+                        [ "12h", _("12 hours") ],
+                        [ "24h", _("1 day") ],
+                        [ "48h", _("2 days") ],
+                        [ "96h", _("4 days") ],
+                        [ "168h", _("1 week") ]
                     ]
                 })
             },{
-                xtype: "textfield",
-                name: "dns-domains",
-                fieldLabel: _("DNS Search Domain(s)"),
-                allowBlank: true,
-                value: "",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Separate multiple entries with commas.")
+                xtype      : "textfield",
+                name       : "dns-domains",
+                fieldLabel : _("DNS Search Domain(s)"),
+                allowBlank : true,
+                value      : "",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Separate multiple entries with commas.")
                 }]
             },{
-                xtype: "textfield",
-                name: "wins-servers",
-                fieldLabel: _("WINS Server(s)"),
-                allowBlank: true,
-                value: "",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Separate multiple entries with commas.")
+                xtype      : "textfield",
+                name       : "wins-servers",
+                fieldLabel : _("WINS Server(s)"),
+                allowBlank : true,
+                value      : "",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Separate multiple entries with commas.")
                 }]
             },{
-                xtype: "textfield",
-                name: "ntp-servers",
-                fieldLabel: _("NTP Server(s)"),
-                allowBlank: true,
-                value: "",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Separate multiple entries with commas.")
+                xtype      : "textfield",
+                name       : "ntp-servers",
+                fieldLabel : _("NTP Server(s)"),
+                allowBlank : true,
+                value      : "",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Separate multiple entries with commas.")
                 }]
             },{
-                xtype: "textfield",
-                name: "dns-servers",
-                fieldLabel: _("DNS Server(s)"),
-                allowBlank: true,
-                value: "",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("Separate multiple entries with commas.") + ' ' + _('If you only want to use this DNS Server, just enter the IP of this host.')
+                xtype      : "textfield",
+                name       : "dns-servers",
+                fieldLabel : _("DNS Server(s)"),
+                allowBlank : true,
+                value      : "",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Separate multiple entries with commas.") + " " +
+                            _("If you only want to use this DNS Server, just enter the IP of this host.")
                 }]
             },{
-                xtype: "textfield",
-                name: "bootfile",
-                fieldLabel: _("DHCP Boot"),
-                allowBlank: true,
-                value: "",
-                plugins: [{
-                    ptype: "fieldinfo",
-                    text: _("If set, this file must exist on the TFTP share. Example: /pxelinux.0,0.0.0.0")
+                xtype      : "textfield",
+                name       : "bootfile",
+                fieldLabel : _("DHCP Boot"),
+                allowBlank : true,
+                value      : "",
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("If set, this file must exist on the TFTP share. Example: /pxelinux.0,0.0.0.0")
                 }]
             }]
         },{
-            xtype: "fieldset",
-            title: _("Extra"),
-            defaults: {
-                labelSeparator: ""
+            xtype    : "fieldset",
+            title    : _("Extra"),
+            defaults : {
+                labelSeparator : ""
             },
-            items: [{
-				xtype: "textarea",
-				name: "extraoptions",
-				fieldLabel: _("Extra options"),
-				allowBlank: true,
-				plugins: [{
-					ptype: "fieldinfo",
-					text: _("Extra options for dnsmasq configuration file."),
-				}]
+            items    : [{
+                xtype      : "textarea",
+                name       : "extraoptions",
+                fieldLabel : _("Extra options"),
+                allowBlank : true,
+                plugins    : [{
+                    ptype : "fieldinfo",
+                    text  : _("Extra options for dnsmasq configuration file.")
+                }]
             }]
         }];
     }
 });
 
 OMV.WorkspaceManager.registerPanel({
-    id: "settings",
-    path: "/service/dnsmasq",
-    text: _("Settings"),
-    position: 10,
-    className: "OMV.module.admin.service.dnsmasq.Settings"
+    id        : "settings",
+    path      : "/service/dnsmasq",
+    text      : _("Settings"),
+    position  : 10,
+    className : "OMV.module.admin.service.dnsmasq.Settings"
 });

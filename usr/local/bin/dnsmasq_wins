@@ -22,46 +22,39 @@
 
 if [ -e "/var/lib/samba/wins.dat" ]; then
 
-	WINSHOSTSTMP="/tmp/winshosts.$$"
+    WINSHOSTSTMP="/tmp/winshosts.$$"
 
-	if [ -e "$WINSHOSTSTMP" ]; then
-		echo $WINSHOSTSTMP already exists. Exiting...
-		exit 11
-	fi
+    if [ -e "$WINSHOSTSTMP" ]; then
+        echo $WINSHOSTSTMP already exists. Exiting...
+        exit 11
+    fi
 
-	echo ''>${WINSHOSTSTMP}
+    echo ''>${WINSHOSTSTMP}
+    WINSHOSTS=""
 
-	WINSHOSTS=""
+    for I in $(cat /var/lib/samba/wins.dat | awk '{ print $3, $1 }' | sed -e s'/#.*"//' | sed -e 's/"//' | tr '[A-Z]' '[a-z]' | grep -v '^0' | sed -e 's/ /$/' | sort -u); do
+        IP=`echo $I | awk -F\$ '{ print $1 }'`
+        HOST=`echo $I | awk -F\$ '{ print $2 }'`
 
-	for I in $(cat /var/lib/samba/wins.dat | awk '{ print $3, $1 }' | sed -e s'/#.*"//' | sed -e 's/"//' | tr '[A-Z]' '[a-z]' | grep -v '^0' | sed -e 's/ /$/' | sort -u); do
+        # Must be valid
+        if [ "$IP" = "" ] || [ "$HOST" = "" ]; then
+            continue
+        fi
 
-		IP=`echo $I | awk -F\$ '{ print $1 }'`
-		HOST=`echo $I | awk -F\$ '{ print $2 }'`
+        # check for IP in hosts file
+        if [ `grep -c "^$IP\\s" /etc/dnsmasq-hosts` -gt 0 ]; then
+            continue
+        fi
 
-		# Must be valid
-		if [ "$IP" = "" ] || [ "$HOST" = "" ]; then
-			continue
-		fi
+        # check for hostname in hosts file
+        if [ `grep -c "\\s$HOST\$" /etc/dnsmasq-hosts` -gt 0 ]; then
+            continue
+        fi
 
-		# check for IP in hosts file
-		if [ `grep -c "^$IP\\s" /etc/dnsmasq-hosts` -gt 0 ]; then
-			continue
-		fi
+        echo "$IP\t$HOST" >>${WINSHOSTSTMP}
+    done
 
-		# check for hostname in hosts file
-		if [ `grep -c "\\s$HOST\$" /etc/dnsmasq-hosts` -gt 0 ]; then
-			continue
-		fi
-
-		echo "$IP\t$HOST" >>${WINSHOSTSTMP}
-
-	done
-
-	/bin/mv ${WINSHOSTSTMP} /etc/dnsmasq-winshosts
-
+    /bin/mv ${WINSHOSTSTMP} /etc/dnsmasq-winshosts
 else
-
-	echo >/etc/dnsmasq-winshosts
-
+    echo >/etc/dnsmasq-winshosts
 fi
-

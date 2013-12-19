@@ -70,9 +70,8 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         // Get the configuration object.
         $xpath = "//services/dnsmasq";
         $object = $xmlConfig->get($xpath);
-        if(is_null($object)) {
+        if(is_null($object))
             throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-        }
 
         // Modify the result object.
         $object['enable']           = boolval($object['enable']);
@@ -153,9 +152,8 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         // DHCP isn't enabled if dnsmasq isn't enabled
         $object['dhcp-enable'] = ($object['enable'] && $object['dhcp-enable']);
 
-        if(FALSE === $xmlConfig->replace("//services/dnsmasq", $object)) {
+        if(FALSE === $xmlConfig->replace("//services/dnsmasq", $object))
             throw new OMVException(OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED);
-        }
 
         // Notify configuration changes.
         $dispatcher = &OMVNotifyDispatcher::getInstance();
@@ -178,7 +176,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
      */
      public function getLeases($params, $context) {
         global $xmlConfig;
-        
+
         // Validate the RPC caller context.
         $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
 
@@ -200,7 +198,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $ip = "";
 
         $ints = $xmlConfig->getList("//system/network/interfaces/iface");
-        
+
         // This may not exist if DHCP is not enabled
         if (FALSE === $xmlConfig->get("//services/dnsmasq/dhcp-enable"))
             return $leases;
@@ -221,11 +219,10 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             list($exp, $mac, $ip, $name) = preg_split('/\s+/', $line);
 
             // Set display name
-            if ($name != '*') {
+            if ($name != '*')
                 $disp = "{$name} ({$ip})";
-            } else {
+            else
                 $disp = $ip;
-            }
 
             // Calculate expiry
             $exp -= time();
@@ -429,14 +426,12 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         }
 
         // CNAMES must be unique
-        if (! empty($object['cnames']))
-        {
+        if (! empty($object['cnames'])) {
             $cnames = str_replace(array(" ", "'", '"', '/', '\\'), '', trim($object['cnames']));
             $cnames = preg_replace('/\s*,\s*/', ', ', $cnames);
             $cnames = array_unique(explode(', ', $cnames));
 
-            foreach ($cnames as $cname)
-            {
+            foreach ($cnames as $cname) {
                 // check for exact name
                 try {
                     $ex = $xmlConfig->get("//services/dnsmasq/entries/entry[name='{$cname}']");
@@ -445,21 +440,18 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                     $ex = null;
                 }
 
-                if ($ex && $ex['uuid'] != $object['uuid']) {
+                if ($ex && $ex['uuid'] != $object['uuid'])
                     throw new Exception("An entry with the host name (or other names) '{$cname}' already exists.");
-                }
 
                 $exnames = $xmlConfig->getList("//services/dnsmasq/entries/entry[contains(cnames, '{$cname}')]");
 
                 foreach ($exnames as $ex) {
                     // Skip ourselves
-                    if ($object['uuid'] == $ex['uuid']) {
+                    if ($object['uuid'] == $ex['uuid'])
                         continue;
-                    }
 
-                    if (preg_match("/(^|\s){$cname}(,|$)/", $ex['cnames'])) {
+                    if (preg_match("/(^|\s){$cname}(,|$)/", $ex['cnames']))
                         throw new Exception("An entry with the host name (or other names) '{$cname}' already exists.");
-                    }
                 }
             }
 
@@ -502,9 +494,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, '{
-            "type":"object",
-            "properties":{
-                "uuid":{'.$GLOBALS['OMV_JSONSCHEMA_UUID'].'}
+            "type"       : "object",
+            "properties" : {
+                "uuid" : { '.$GLOBALS['OMV_JSONSCHEMA_UUID'].' }
             }
         }');
 

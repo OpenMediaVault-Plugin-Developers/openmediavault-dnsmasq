@@ -24,9 +24,9 @@
  // require("js/omv/WorkspaceManager.js")
 
 OMV.WorkspaceManager.registerNode({
-    id: "dnsmasq",
-    path: "/service",
-    text: _("Local DNS/DHCP"),
-    icon16: "images/dnsmasq.png",
-    iconSvg: "images/dnsmasq.svg"
+    id      : "dnsmasq",
+    path    : "/service",
+    text    : _("Local DNS/DHCP"),
+    icon16  : "images/dnsmasq.png",
+    iconSvg : "images/dnsmasq.svg"
 });

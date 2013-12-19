@@ -1,5 +1,4 @@
 /**
-  *
  * @license     http://www.gnu.org/licenses/gpl.html GPL Version 3
  * @author      Ian Moore <imooreyahoo@gmail.com>
  * @author      Marcel Beck <marcel.beck@mbeck.org>
@@ -20,7 +19,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this file. If not, see <http://www.gnu.org/licenses/>.
- *
  */
 // require("js/omv/WorkspaceManager.js")
 // require("js/omv/workspace/grid/Panel.js")
@@ -32,21 +30,21 @@
 // require("js/omv/data/proxy/Rpc.js")
 
 Ext.define("OMV.module.admin.service.dnsmasq.Leases", {
-    extend: "OMV.workspace.grid.Panel",
-    requires: [
+    extend   : "OMV.workspace.grid.Panel",
+    requires : [
         "OMV.Rpc",
         "OMV.data.Store",
         "OMV.data.Model",
         "OMV.data.proxy.Rpc"
     ],
 
-    hidePagingToolbar: false,
-	hideAddButton: true,
-	hideEditButton: true,
-	hideDeleteButton: true,
-    stateful: true,
-    stateId: "9876057b-b2c0-4c48-a4c1-8c9b4fb54d7b",
-    columns:[{
+    hidePagingToolbar : false,
+    hideAddButton     : true,
+    hideEditButton    : true,
+    hideDeleteButton  : true,
+    stateful          : true,
+    stateId           : "9876057b-b2c0-4c48-a4c1-8c9b4fb54d7b",
+    columns           : [{
         text      : _("Computer Name"),
         sortable  : true,
         dataIndex : "name",
@@ -68,25 +66,25 @@ Ext.define("OMV.module.admin.service.dnsmasq.Leases", {
         stateId   : "exp"
     }],
 
-    initComponent: function () {
+    initComponent : function () {
         var me = this;
         Ext.apply(me, {
-            store: Ext.create("OMV.data.Store", {
-                autoLoad: true,
-                model: OMV.data.Model.createImplicit({
-                    idProperty: "name",
-                    fields: [
-                        { name: "name", type: "string" },
-                        { name: "ip", type: "string" },
-                        { name: "mac", type: "string" },
-                        { name: "exp", type: "string" }
+            store : Ext.create("OMV.data.Store", {
+                autoLoad : true,
+                model    : OMV.data.Model.createImplicit({
+                    idProperty  : "name",
+                    fields      : [
+                        { name : "name", type: "string" },
+                        { name : "ip", type: "string" },
+                        { name : "mac", type: "string" },
+                        { name : "exp", type: "string" }
                     ]
                 }),
-                proxy: {
-                    type: "rpc",
-                    rpcData: {
-                        service: "Dnsmasq",
-                        method: "getLeases"
+                proxy : {
+                    type    : "rpc",
+                    rpcData : {
+                        service : "Dnsmasq",
+                        method  : "getLeases"
                     }
                 }
             })
@@ -96,9 +94,9 @@ Ext.define("OMV.module.admin.service.dnsmasq.Leases", {
 });
 
 OMV.WorkspaceManager.registerPanel({
-    id: "leases",
-    path: "/service/dnsmasq",
-    text: _("Leases"),
-    position: 30,
-    className: "OMV.module.admin.service.dnsmasq.Leases"
+    id        : "leases",
+    path      : "/service/dnsmasq",
+    text      : _("Leases"),
+    position  : 30,
+    className : "OMV.module.admin.service.dnsmasq.Leases"
 });

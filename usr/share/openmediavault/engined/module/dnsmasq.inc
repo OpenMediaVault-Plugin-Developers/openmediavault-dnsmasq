@@ -66,11 +66,6 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
     public function stopService() {
         $initd = new OMVSysVInitScript("dnsmasq", FALSE);
         $initd->exec();
-
-        $cmd = "sudo /etc/init.d/dnsmasq stop 2>&1";
-        if(0 !== $this->exec($cmd, $output)) {
-            throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
-        }
     }
 
     /**
@@ -168,9 +163,15 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
     function bindListeners(OMVNotifyDispatcher $dispatcher)
     {
         /* Update service if configuration has been modified */
-        $dispatcher->addListener(OMV_NOTIFY_MODIFY, "org.openmediavault.services.dnsmasq", array($this, "updateService"), 1);
+        $dispatcher->addListener(
+            OMV_NOTIFY_MODIFY,
+            "org.openmediavault.services.dnsmasq",
+            array($this, "setDirty"), 1);
 
-        $dispatcher->addListener(OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE | OMV_NOTIFY_CREATE, "org.openmediavault.services.dnsmasq.entries.entry", array($this, "updateEntry"), 1);
+        $dispatcher->addListener(
+            OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE | OMV_NOTIFY_CREATE,
+            "org.openmediavault.services.dnsmasq.entries.entry",
+            array($this, "updateEntry"), 1);
     }
 
 }
