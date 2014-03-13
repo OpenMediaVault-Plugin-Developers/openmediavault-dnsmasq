@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Marcel Beck <marcel.beck@mbeck.org>
+# @copyright Copyright (c) 2012 Marcel Beck
+# @copyright Copyright (c) 2009-2013 Volker Theile
+# @copyright Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+SERVICE_XPATH_NAME="dnsmasq"
+SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
+
+case "$1" in
+    configure)
+
+        # Check for XML config
+        if ! omv_config_exists "${SERVICE_XPATH}"; then
+            omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/dhcp-enable"; then
+                omv_config_add_element "${SERVICE_XPATH}" "dhcp-enable" "0"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/extraoptions"; then
+                omv_config_add_element "${SERVICE_XPATH}" "extraoptions" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/domain-name"; then
+                omv_config_add_element "${SERVICE_XPATH}" "domain-name" "local"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/network"; then
+                omv_config_add_element "${SERVICE_XPATH}" "network" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/gateway"; then
+                omv_config_add_element "${SERVICE_XPATH}" "gateway" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/first-ip"; then
+                omv_config_add_element "${SERVICE_XPATH}" "first-ip" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/last-ip"; then
+                omv_config_add_element "${SERVICE_XPATH}" "last-ip" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/default-lease-time"; then
+                omv_config_add_element "${SERVICE_XPATH}" "default-lease-time" "168h"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/wins-servers"; then
+                omv_config_add_element "${SERVICE_XPATH}" "wins-servers" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/ntp-servers"; then
+                omv_config_add_element "${SERVICE_XPATH}" "ntp-servers" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/bootfile"; then
+                omv_config_add_element "${SERVICE_XPATH}" "bootfile" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/dns-log-queries"; then
+                omv_config_add_element "${SERVICE_XPATH}" "dns-log-queries" "0"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/log-dhcp"; then
+                omv_config_add_element "${SERVICE_XPATH}" "log-dhcp" "0"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/dns-wins"; then
+                omv_config_add_element "${SERVICE_XPATH}" "dns-wins" "0"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/enable"; then
+                omv_config_add_element "${SERVICE_XPATH}" "enable" "0"
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/entries"; then
+                omv_config_add_element "${SERVICE_XPATH}" "entries" ""
+        fi
+
+        if ! omv_config_exists "${SERVICE_XPATH}/dns-servers"; then
+                omv_config_add_element "${SERVICE_XPATH}" "dns-servers" ""
+        fi
+
+        # Reload rsyslogd so that it sees the new config file
+        /etc/init.d/rsyslog restart
+
+        chown root /usr/local/bin/dnsmasq_wins
+        chmod 0700 /usr/local/bin/dnsmasq_wins
+
+        # Backup dnsmasq config
+        if [ ! -e /etc/default/dnsmasq-orig ]; then
+            /bin/cp /etc/default/dnsmasq /etc/default/dnsmasq-orig
+        fi
+
+        # Run config and restart dnsmasq
+        omv-mkconf dnsmasq 2>/dev/null
+        /etc/init.d/dnsmasq restart || true
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

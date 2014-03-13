@@ -1,29 +1,27 @@
 <?php
 /**
- *
  * @license     http://www.gnu.org/licenses/gpl.html GPL Version 3
  * @author      Ian Moore <imooreyahoo@gmail.com>
  * @author      Marcel Beck <marcel.beck@mbeck.org>
  * @author      OpenMediaVault Plugin Developers <plugins@omv-extras.org>
  * @copyright   Copyright (c) 2011 Ian Moore
  * @copyright   Copyright (c) 2012 Marcel Beck
- * @copyright   Copyright (c) 2013 OpenMediaVault Plugin Developers
+ * @copyright   Copyright (c) 2009-2013 Volker Theile
+ * @copyright   Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
  *
- * This file is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * This file is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this file. If not, see <http://www.gnu.org/licenses/>.
- *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 require_once("openmediavault/object.inc");
 require_once("openmediavault/config.inc");
 require_once("openmediavault/error.inc");
@@ -74,11 +72,11 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
 
         // Modify the result object.
-        $object['enable']           = boolval($object['enable']);
-        $object['dhcp-enable']      = intval($object['dhcp-enable']);
-        $object['dns-log-queries']  = intval($object['dns-log-queries']);
-        $object['log-dhcp']         = intval($object['log-dhcp']);
-        $object['dns-wins']         = intval($object['dns-wins']);
+        $object['enable']          = boolval($object['enable']);
+        $object['dhcp-enable']     = boolval($object['dhcp-enable']);
+        $object['dns-log-queries'] = boolval($object['dns-log-queries']);
+        $object['log-dhcp']        = boolval($object['log-dhcp']);
+        $object['dns-wins']        = boolval($object['dns-wins']);
 
         return $object;
     }
@@ -123,23 +121,23 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // Update the configuration object.
         $object = array(
-            "enable"                => array_boolval($params, 'enable'),
-            "dns-log-queries"       => array_boolval($params, 'dns-log-queries'),
-            "dhcp-enable"           => array_boolval($params, 'dhcp-enable'),
-            "dns-wins"              => array_boolval($params, 'dns-wins'),
-            "log-dhcp"              => array_boolval($params, 'log-dhcp'),
-            "domain-name"           => $params['domain-name'],
-            "bootfile"              => $params['bootfile'],
-            "gateway"               => $params['gateway'],
-            "default-lease-time"    => $params['default-lease-time'],
-            "ntp-servers"           => $params['ntp-servers'],
-            "dns-domains"           => $params['dns-domains'],
-            "wins-servers"          => $params['wins-servers'],
-            "dns-servers"           => $params['dns-servers'],
-            "network"               => $params['network'],
-            "first-ip"              => $params['first-ip'],
-            "last-ip"               => $params['last-ip'],
-            "extraoptions"          => $params['extraoptions']
+            "enable"             => array_boolval($params, 'enable'),
+            "dns-log-queries"    => array_boolval($params, 'dns-log-queries'),
+            "dhcp-enable"        => array_boolval($params, 'dhcp-enable'),
+            "dns-wins"           => array_boolval($params, 'dns-wins'),
+            "log-dhcp"           => array_boolval($params, 'log-dhcp'),
+            "domain-name"        => $params['domain-name'],
+            "bootfile"           => $params['bootfile'],
+            "gateway"            => $params['gateway'],
+            "default-lease-time" => $params['default-lease-time'],
+            "ntp-servers"        => $params['ntp-servers'],
+            "dns-domains"        => $params['dns-domains'],
+            "wins-servers"       => $params['wins-servers'],
+            "dns-servers"        => $params['dns-servers'],
+            "network"            => $params['network'],
+            "first-ip"           => $params['first-ip'],
+            "last-ip"            => $params['last-ip'],
+            "extraoptions"       => $params['extraoptions']
         );
 
         // DHCP isn't enabled if dnsmasq isn't enabled

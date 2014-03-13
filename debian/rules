@@ -2,10 +2,15 @@
 
 include ./openmediavault.mk
 
+PLUGIN_NAME=dnsmasq
+
 clean:
 	dh_testdir
 	dh_testroot
 	dh_clean
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/${PLUGIN_NAME}
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/samba.d/11global-${PLUGIN_NAME}
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/local/bin/dnsmasq_wins
 
 install:
 	dh_testdir

@@ -42,17 +42,11 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
 
     public function applyConfig() {
 
-        $cmd = "omv-mkconf dnsmasq 2>&1";
-        if(0 !== $this->exec($cmd, $output)) {
-            throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
-        }
-
         global $xmlConfig;
 
         $cmd = "omv-mkconf dnsmasq 2>&1";
-        if(0 !== $this->exec($cmd, $output)) {
+        if(0 !== $this->exec($cmd, $output))
             throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
-        }
 
         // Restart samba enabling dnsmasq or enabling dns-wins
         // not sure how
@@ -74,12 +68,12 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
      */
     public function startService() {
         global $xmlConfig;
+
         $xpath = "//services/dnsmasq";
         $object = $xmlConfig->get($xpath);
-        if(is_null($object)) {
-            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-              $xpath);
-        }
+        if(is_null($object))
+            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
+
         if(FALSE === boolval($object['enable']))
             return;
 
@@ -98,9 +92,8 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         // Create dnsmasq config
         $cmd = "sudo omv-mkconf dnsmasq 2>&1";
         OMVUtil::exec($cmd, $output, $result);
-        if ($result !== 0) {
+        if ($result !== 0)
             throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
-        }
 
         // If WINS support is enabled, we need to
         // regenerate the dnsmasq wins file so that
@@ -108,20 +101,17 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         if ($xmlConfig->get("//services/dnsmasq/dns-wins") == "1") {
             $cmd = "sudo /usr/local/bin/dnsmasq_wins 2>&1";
             OMVUtil::exec($cmd, $output, $result);
-            if ($result !== 0) {
+            if ($result !== 0)
                 throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
-            }
         }
 
         // Only need to restart if CNAMEs change.
         // Other files are monitored by dnsmasq
-        if (empty($conf['cnames'])){
+        if ( empty($conf['cnames']) )
             $conf['cnames'] = '';
-        }
 
-        if (empty($oldconf['cnames'])) {
+        if ( empty($oldconf['cnames']))
             $oldconf['cnames'] = '';
-        }
 
         if ($conf['cnames'] != $oldconf['cnames']) {
             $initd = new OMVSysVInitScript("dnsmasq");
@@ -131,7 +121,6 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         } else {
             exec("sudo kill -HUP `pidof dnsmasq`");
         }
-
     }
 
     /**
@@ -143,9 +132,8 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         // Get the configuration object
         $xpath  = "//services/dnsmasq";
         $object = $xmlConfig->get($xpath);
-        if (is_null($object)) {
+        if (is_null($object))
             throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-        }
 
         $initd = new OMVSysVInitScript("dnsmasq");
 
@@ -160,8 +148,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
     /**
      * Bind listeners.
      */
-    function bindListeners(OMVNotifyDispatcher $dispatcher)
-    {
+    function bindListeners(OMVNotifyDispatcher $dispatcher) {
         /* Update service if configuration has been modified */
         $dispatcher->addListener(
             OMV_NOTIFY_MODIFY,
