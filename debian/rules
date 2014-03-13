@@ -8,9 +8,6 @@ clean:
 	dh_testdir
 	dh_testroot
 	dh_clean
-	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/${PLUGIN_NAME}
-	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/samba.d/11global-${PLUGIN_NAME}
-	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/local/bin/dnsmasq_wins
 
 install:
 	dh_testdir
@@ -18,6 +15,9 @@ install:
 	dh_prep
 	dh_installdirs
 	dh_install
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/${PLUGIN_NAME}
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/share/openmediavault/mkconf/samba.d/11global-${PLUGIN_NAME}
+	chmod +x $(CURDIR)/debian/openmediavault-${PLUGIN_NAME}/usr/local/bin/dnsmasq_wins
 
 binary-indep: install omv_clean_scm
 	dh_testdir
