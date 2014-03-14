@@ -1,4 +1,4 @@
-openmediavault-dnsmasq (0.5.0.12) stable; urgency=low
+openmediavault-dnsmasq (0.5.0) stable; urgency=low
 
   * port to 0.5
 

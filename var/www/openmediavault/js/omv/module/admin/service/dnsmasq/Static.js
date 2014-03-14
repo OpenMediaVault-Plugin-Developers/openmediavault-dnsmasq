@@ -152,12 +152,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
 
     getFormItems : function () {
         return [{
-            border : false,
-            html   : _("To create a DNS entry, specify IP address and Host Name. Optionally, you may enter other names which  the host should be known as.<br /><br />")
-        },{
-            border : false,
-            html   : _("Specifying a MAC Address and IP Address will create a static IP DHCP entry.<br /><br />Entering all fields will create an all-in-one static ip reservation and DNS entry.<br /><br />")
-        },{
             xtype      : "textfield",
             name       : "name",
             itemId     : "name",
@@ -230,6 +224,13 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
                     property  : "mac"
                 }]
             })
+        },{
+            border : false,
+            html   : "<ul>" +
+                     "<li>" + _("To create a DNS entry, specify IP address and Host Name. Optionally, you may enter other names which the host should be known as.") + "</li>" +
+                     "<li>" + _("Specifying a MAC Address and IP Address will create a static IP DHCP entry.") + "</li>" +
+                     "<li>" + _("Entering all fields will create an all-in-one static ip reservation and DNS entry.") + "</li>" +
+                     "</ul>"
         }];
     }
 });
