@@ -171,17 +171,6 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         // Validate the RPC caller context.
         $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
 
-        // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"       : "object",
-            "properties" : {
-                "start"     : { "type" : "integer" },
-                "limit"     : { '.$GLOBALS['OMV_JSONSCHEMA_COUNTFIELD'].' },
-                "sortfield" : { '.$GLOBALS['OMV_JSONSCHEMA_SORTFIELD'].' },
-                "sortdir"   : { '.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].' }
-            }
-        }');
-
         $leases = array();
         $exp = "";
         $name = "";
@@ -309,21 +298,20 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, '{
-            "type":"object",
-            "properties":{
-                "start":{"type":"integer"},
-                "limit":{'.$GLOBALS['OMV_JSONSCHEMA_COUNTFIELD'].'},
-                "sortfield":{'.$GLOBALS['OMV_JSONSCHEMA_SORTFIELD'].'},
-                "sortdir":{'.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].'}
+            "type"       : "object",
+            "properties" : {
+                "start"     : { "type" : "integer" },
+                "limit"     : { '.$GLOBALS['OMV_JSONSCHEMA_COUNTFIELD'].' },
+                "sortfield" : { '.$GLOBALS['OMV_JSONSCHEMA_SORTFIELD'].' },
+                "sortdir"   : { '.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].' }
             }
         }');
 
         // Get the configuration object.
         $xpath = "//services/dnsmasq/entries/entry";
         $objects = $xmlConfig->getList($xpath);
-        if(is_null($objects)) {
+        if(is_null($objects))
             throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-        }
 
         // Filter the result.
         return $this->applyFilter($objects, $params['start'],
@@ -345,18 +333,17 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, '{
-            "type":"object",
-            "properties":{
-                "uuid":{'.$GLOBALS['OMV_JSONSCHEMA_UUID'].'}
+            "type"       : "object",
+            "properties" : {
+                "uuid" : { '.$GLOBALS['OMV_JSONSCHEMA_UUID'].' }
             }
         }');
 
         // Get the configuration object.
         $xpath = sprintf("//services/dnsmasq/entries/entry[uuid='%s']", $params['uuid']);
         $object = $xmlConfig->get($xpath);
-        if(is_null($object)) {
+        if(is_null($object))
             throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-        }
 
         return $object;
     }
@@ -374,23 +361,23 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, '{
-            "type":"object",
-            "properties":{
-                "uuid":{'.$GLOBALS['OMV_JSONSCHEMA_UUID_UNDEFINED'].'},
-                "ip":{"type":"string","format":"regex","pattern":"\/^(([0-9]{1,3}\\\.){3}[0-9]{1,3}|)$\/i","optional":true},
-                "name":{"type":"string","optional":true},
-                "cnames":{"type":"string","optional":true},
-                "mac":{"type":"string","format":"regex","pattern":"\/^(([a-f0-9]{2}:){5}[a-f0-9]{2})(,(([a-f0-9]{2}:){5}[a-f0-9]{2}))*$\/i","optional":true}
+            "type"        : "object",
+            "properties"  : {
+                "uuid"   : { '.$GLOBALS['OMV_JSONSCHEMA_UUID_UNDEFINED'].' },
+                "ip"     : { "type" : "string", "optional" : true },
+                "name"   : { "type" : "string", "optional" : true },
+                "cnames" : { "type" : "string", "optional" : true },
+                "mac"    : { "type" : "string", "optional" : true }
             }
         }');
 
         // Prepare configuration data.
         $object = array(
-            "uuid" => ($params['uuid'] == $GLOBALS['OMV_UUID_UNDEFINED']) ? OMVUtil::uuid() : $params['uuid'],
-            "ip" => $params['ip'],
-            "name" => strtolower($params['name']),
+            "uuid"   => ($params['uuid'] == $GLOBALS['OMV_UUID_UNDEFINED']) ? OMVUtil::uuid() : $params['uuid'],
+            "ip"     => $params['ip'],
+            "name"   => strtolower($params['name']),
             "cnames" => strtolower($params['cnames']),
-            "mac" => strtolower($params['mac'])
+            "mac"    => strtolower($params['mac'])
         );
 
         // Set the configuration data.
@@ -455,13 +442,11 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             $success = $xmlConfig->set("//services/dnsmasq/entries", array("entry" => $object));
         } else {
             // Update the existing configuration object.
-            $success = $xmlConfig->replace("//services/minidlna/shares/share[" .
-                "uuid='{$params['uuid']}']", $object);
+            $success = $xmlConfig->replace("//services/dnsmasq/entries/entry[uuid='{$params['uuid']}']", $object);
         }
 
-        if(FALSE === $success) {
+        if(FALSE === $success)
             throw new OMVException(OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED);
-        }
 
         // Notify configuration changes.
         $dispatcher = &OMVNotifyDispatcher::getInstance();

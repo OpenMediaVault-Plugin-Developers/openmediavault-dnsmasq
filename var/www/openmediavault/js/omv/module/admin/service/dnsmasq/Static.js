@@ -59,7 +59,8 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entries", {
         dataIndex : "cnames"
     }, {
         text      : _("MAC Address"),
-        sortable  : true
+        sortable  : true,
+        dataIndex : "mac"
     }],
 
     initComponent: function () {
@@ -147,6 +148,8 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
         ptype : "configobject"
     }],
 
+    width        : 600,
+
     getFormItems : function () {
         return [{
             border : false,
@@ -176,6 +179,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
         },{
             xtype      : "textfield",
             name       : "ip",
+            vtype      : "IPv4",
             fieldLabel : _("IP Address"),
             allowBlank : false
         },{
@@ -186,6 +190,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
         },{
             xtype         : "combo",
             name          : "exlease",
+            submitValue   : false,
             fieldLabel    : "Lease",
             emptyText     : _("Select existing lease ..."),
             allowBlank    : true,
@@ -194,6 +199,13 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
             triggerAction : "all",
             displayField  : "disp",
             valueField    : "mac",
+            listeners     : {
+                select : function (a, b, c) {
+                    this.ownerCt.getComponent('ip').setValue(b.data.ip);
+                    this.ownerCt.getComponent('mac').setValue(b.data.mac);
+                    this.ownerCt.getComponent('name').setValue(b.data.name);
+                }
+            },
             store         : Ext.create("OMV.data.Store", {
                 autoLoad : true,
                 model    : OMV.data.Model.createImplicit({
