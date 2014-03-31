@@ -78,6 +78,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $object['log-dhcp']        = boolval($object['log-dhcp']);
         $object['dns-wins']        = boolval($object['dns-wins']);
 
+        // Remove useless fields from the result object.
+        unset($object['entries']);
+        
         return $object;
     }
 
@@ -119,6 +122,12 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             }
         }');
 
+        // Get the existing configuration object.
+        $xpath = "//services/dnsmasq";
+        $oldObject = $xmlConfig->get($xpath);
+        if(is_null($oldObject))
+            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
+            
         // Update the configuration object.
         $object = array(
             "enable"             => array_boolval($params, 'enable'),
@@ -137,7 +146,8 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             "network"            => $params['network'],
             "first-ip"           => $params['first-ip'],
             "last-ip"            => $params['last-ip'],
-            "extraoptions"       => $params['extraoptions']
+            "extraoptions"       => $params['extraoptions'],
+            "entries"            => isset($oldObject['entries']) ? $oldObject['entries'] : array()
         );
 
         // DHCP isn't enabled if dnsmasq isn't enabled

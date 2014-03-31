@@ -7,20 +7,21 @@
  * @author      OpenMediaVault Plugin Developers <plugins@omv-extras.org>
  * @copyright   Copyright (c) 2011 Ian Moore
  * @copyright   Copyright (c) 2012 Marcel Beck
- * @copyright   Copyright (c) 2013 OpenMediaVault Plugin Developers
+ * @copyright   Copyright (c) 2009-2013 Volker Theile 
+ * @copyright   Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
  *
- * This file is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * This file is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this file. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 require_once("openmediavault/module.inc");
@@ -41,16 +42,19 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
     }
 
     public function applyConfig() {
-
         global $xmlConfig;
 
         $cmd = "omv-mkconf dnsmasq 2>&1";
         if(0 !== $this->exec($cmd, $output))
             throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
 
-        // Restart samba enabling dnsmasq or enabling dns-wins
-        // not sure how
-        if(FALSE === boolval($this->configGet("//services/dnsmasq/enable")))
+        // Restart samba enabling dnsmasq or enabling dns-wins - not sure how
+        $xpath = "//services/dnsmasq";
+        $object = $xmlConfig->get($xpath);
+        if(is_null($object))
+            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
+
+        if(FALSE === boolval($object['enable']))
             return;
 
         $initd = new OMVSysVInitScript("dnsmasq", TRUE);
@@ -90,7 +94,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         global $xmlConfig;
 
         // Create dnsmasq config
-        $cmd = "sudo omv-mkconf dnsmasq 2>&1";
+        $cmd = "omv-mkconf dnsmasq 2>&1";
         OMVUtil::exec($cmd, $output, $result);
         if ($result !== 0)
             throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
@@ -99,7 +103,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         // regenerate the dnsmasq wins file so that
         // static entries aren't over written by wins
         if ($xmlConfig->get("//services/dnsmasq/dns-wins") == "1") {
-            $cmd = "sudo /usr/local/bin/dnsmasq_wins 2>&1";
+            $cmd = "/usr/local/bin/dnsmasq_wins 2>&1";
             OMVUtil::exec($cmd, $output, $result);
             if ($result !== 0)
                 throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
@@ -119,7 +123,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
 
             // Otherwise, HUP the process
         } else {
-            exec("sudo kill -HUP `pidof dnsmasq`");
+            exec("kill -HUP `pidof dnsmasq`");
         }
     }
 
