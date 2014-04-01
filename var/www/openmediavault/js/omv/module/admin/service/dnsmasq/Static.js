@@ -151,6 +151,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
     width        : 600,
 
     getFormItems : function () {
+        var me = this;
         return [{
             xtype      : "textfield",
             name       : "name",
@@ -194,10 +195,20 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
             displayField  : "disp",
             valueField    : "mac",
             listeners     : {
-                select : function (a, b, c) {
-                    this.ownerCt.getComponent('ip').setValue(b.data.ip);
-                    this.ownerCt.getComponent('mac').setValue(b.data.mac);
-                    this.ownerCt.getComponent('name').setValue(b.data.name);
+                select : function (combo, records) {
+                    var record = records.pop();
+
+                    var ipInfo = record.get("ip");
+                    var macInfo = record.get("mac");
+                    var nameInfo = record.get("name");
+
+                    var ipField = me.findField("ip");
+                    var macField = me.findField("mac");
+                    var nameField = me.findField("name");
+
+                    ipField.setValue(ipInfo);
+                    macField.setValue(macInfo);
+                    nameField.setValue(nameInfo);
                 }
             },
             store         : Ext.create("OMV.data.Store", {

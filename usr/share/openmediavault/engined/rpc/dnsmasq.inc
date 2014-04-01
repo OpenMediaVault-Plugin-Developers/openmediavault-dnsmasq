@@ -193,6 +193,18 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         if (FALSE === $xmlConfig->get("//services/dnsmasq/dhcp-enable"))
             return $leases;
 
+        if (! file_exists("/var/lib/misc/dnsmasq.leases") ) {
+            $leases[] = array(
+                'ip'   => "192.168.1.102",
+                'mac'  => "a1:b2:c3:d4:e5:f6",
+                'name' => "testsystem",
+                'disp' => "testsystem 192.168.1.102",
+                'exp'  => "expired"
+            );
+            
+            return $leases;
+        }
+
         $fp = fopen("/var/lib/misc/dnsmasq.leases", "ro");
 
         if ($fp === false)
@@ -250,7 +262,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                 'exp'  => $exp
             );
         }
-
+        
         usort($leases, function($a, $b) {
             return strnatcasecmp($a['disp'], $b['disp']);
         });
