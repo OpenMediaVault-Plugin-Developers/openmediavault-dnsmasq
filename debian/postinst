@@ -117,6 +117,9 @@ case "$1" in
         # Run config and restart dnsmasq
         omv-mkconf dnsmasq 2>/dev/null
         /etc/init.d/dnsmasq restart || true
+
+        dpkg-trigger update-fixperms
+        dpkg-trigger update-locale
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
