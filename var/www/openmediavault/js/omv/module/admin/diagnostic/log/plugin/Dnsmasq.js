@@ -2,7 +2,9 @@
  *
  * @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
  * @author    Volker Theile <volker.theile@openmediavault.org>
+ * @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
  * @copyright Copyright (c) 2009-2013 Volker Theile
+ * @copyright Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +25,7 @@
 
 Ext.define("OMV.module.admin.diagnostic.log.plugin.DnsmasqDhcp", {
     extend : "OMV.module.admin.diagnostic.log.plugin.Plugin",
+    alias  : "omv.plugin.diagnostic.log.dnsmasqdhcp",
 
     id       : "dnsmasqdhcp",
     text     : _("DHCP"),
@@ -49,14 +52,9 @@ Ext.define("OMV.module.admin.diagnostic.log.plugin.DnsmasqDhcp", {
     ]
 });
 
-OMV.PluginManager.register({
-    ptype     : "diagnostic",
-    id        : "log",
-    className : "OMV.module.admin.diagnostic.log.plugin.DnsmasqDhcp"
-});
-
 Ext.define("OMV.module.admin.diagnostic.log.plugin.Dnsmasq", {
     extend : "OMV.module.admin.diagnostic.log.plugin.Plugin",
+    alias  : "omv.plugin.diagnostic.log.dnsmasq",
 
     id       : "dnsmasq",
     text     : _("Local DNS"),
@@ -81,10 +79,4 @@ Ext.define("OMV.module.admin.diagnostic.log.plugin.Dnsmasq", {
         { name : "date", type: "string" },
         { name : "event", type: "string" }
     ]
-});
-
-OMV.PluginManager.register({
-    ptype     : "diagnostic",
-    id        : "log",
-    className : "OMV.module.admin.diagnostic.log.plugin.Dnsmasq"
 });

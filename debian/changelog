@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (1.0) UNRELEASED; urgency=low
+
+  * Fix logging
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 20 Aug 2014 14:15:10 -0500
+
 openmediavault-dnsmasq (0.5.0.5) stable; urgency=low
 
   * port to 0.5
