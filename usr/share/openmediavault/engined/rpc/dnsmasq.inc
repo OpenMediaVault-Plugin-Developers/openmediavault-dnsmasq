@@ -115,9 +115,9 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                 "dns-domains"        : { "type" : "string", "optional" : true},
                 "wins-servers"       : { "type" : "string", "optional" : true},
                 "dns-servers"        : { "type" : "string", "optional" : true},
-                "network"            : { "type" : "string"},
-                "first-ip"           : { "type" : "string"},
-                "last-ip"            : { "type" : "string"},
+                "network"            : { "type" : "string", "optional" : true},
+                "first-ip"           : { "type" : "string", "optional" : true},
+                "last-ip"            : { "type" : "string", "optional" : true},
                 "extraoptions"       : { "type" : "string", "optional" : true}
             }
         }');

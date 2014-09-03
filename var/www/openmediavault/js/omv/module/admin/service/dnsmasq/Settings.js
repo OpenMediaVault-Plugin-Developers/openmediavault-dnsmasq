@@ -35,10 +35,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
         ptype        : "linkedfields",
         correlations : [{
             name       : [
-                "network",
-                "gateway",
-                "first-ip",
-                "last-ip"
+                "gateway"
             ],
             conditions : [{
                 name  : "dhcp-enable",
@@ -151,8 +148,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 hiddenName    : "network",
                 fieldLabel    : _("Lease Network"),
                 emptyText     : _("Select a network ..."),
-                allowBlank    : false,
-                allowNone     : false,
+                allowBlank    : true,
                 editable      : false,
                 triggerAction : "all",
                 displayField  : "netid",
