@@ -1,8 +1,14 @@
+openmediavault-dnsmasq (1.0.2) stable; urgency=low
+
+  * Fix typo
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 04 Sep 2014 15:38:43 -0500
+
 openmediavault-dnsmasq (1.0.1) stable; urgency=low
 
   * Make network optional to allow for proxy dhcp
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 03 Sep 2014 17:18:44 -0500
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 04 Sep 2014 15:38:27 -0500
 
 openmediavault-dnsmasq (1.0) stable; urgency=low
 

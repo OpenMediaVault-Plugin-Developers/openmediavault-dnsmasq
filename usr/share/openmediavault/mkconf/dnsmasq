@@ -127,7 +127,7 @@ MASK="$(omv_config_get "//services/dnsmasq/network" | awk '{ print $NF }')"
 if [ "$(omv_config_get "//services/dnsmasq/dhcp-enable")" = "1" ]; then
 
 	xmlstarlet sel -t -m "//services/dnsmasq" \
-		-i "netowkr != ''" -v "concat('dhcp-range=', first-ip, ',', last-ip, ',${MASK},', default-lease-time)" -n \
+		-i "network != ''" -v "concat('dhcp-range=', first-ip, ',', last-ip, ',${MASK},', default-lease-time)" -n \
 		-i "bootfile != ''" -v "concat('dhcp-boot=', bootfile)" -n -b \
 		-i "log-dhcp != 0" -o "log-dhcp" -n -b \
 		-v "concat('dhcp-option=option:router,',gateway)" -n \
