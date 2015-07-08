@@ -32,5 +32,5 @@ if [ "$(omv_config_get "//services/dnsmasq/dns-wins")" != "1" ]; then
    exit 0
 fi
 
-echo "wins hook = /usr/local/bin/dnsmasq_wins" >>${OMV_SAMBA_CONFIG}
+echo "wins hook = /usr/sbin/dnsmasq_wins" >>${OMV_SAMBA_CONFIG}
 

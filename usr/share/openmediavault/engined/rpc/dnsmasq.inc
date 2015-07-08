@@ -187,7 +187,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $mac = "";
         $ip = "";
 
-        $ints = $xmlConfig->getList("//system/network/interfaces/iface");
+        $ints = $xmlConfig->getList("//system/network/interfaces/interface");
 
         // This may not exist if DHCP is not enabled
         if (FALSE === $xmlConfig->get("//services/dnsmasq/dhcp-enable"))
@@ -275,7 +275,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
 
         $nets = array();
-        $ints = $xmlConfig->getList("//system/network/interfaces/iface");
+        $ints = $xmlConfig->getList("//system/network/interfaces/interface");
 
         foreach ($ints as $i) {
             if (! ($i['netmask'] && $i['address']))

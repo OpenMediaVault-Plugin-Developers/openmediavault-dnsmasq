@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (2.0) stable; urgency=low
+
+  * Update for OMV 2.x
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 07 Jul 2015 22:01:46 -0500
+
 openmediavault-dnsmasq (1.0.3) stable; urgency=low
 
   * Add custom debian/control field XB-Plugin-Section

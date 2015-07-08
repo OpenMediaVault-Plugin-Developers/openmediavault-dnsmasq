@@ -106,8 +106,8 @@ case "$1" in
         # Reload rsyslogd so that it sees the new config file
         /etc/init.d/rsyslog restart
 
-        chown root /usr/local/bin/dnsmasq_wins
-        chmod 0700 /usr/local/bin/dnsmasq_wins
+        chown root /usr/sbin/dnsmasq_wins
+        chmod 0700 /usr/sbin/dnsmasq_wins
 
         # Backup dnsmasq config
         if [ ! -e /etc/default/dnsmasq-orig ]; then

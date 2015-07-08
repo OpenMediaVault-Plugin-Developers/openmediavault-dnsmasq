@@ -102,7 +102,7 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
         // regenerate the dnsmasq wins file so that
         // static entries aren't over written by wins
         if ($xmlConfig->get("//services/dnsmasq/dns-wins") == "1") {
-            $cmd = "/usr/local/bin/dnsmasq_wins 2>&1";
+            $cmd = "/usr/sbin/dnsmasq_wins 2>&1";
             OMVUtil::exec($cmd, $output, $result);
             if ($result !== 0)
                 throw new OMVException(OMVErrorMsg::E_EXEC_FAILED, $cmd, implode("\n", $output));
