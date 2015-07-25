@@ -175,17 +175,34 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
      *
      * @return array list of leases
      */
-     public function getLeases($params, $context) {
+     public function getLeases($params, $context)
+     {
         global $xmlConfig;
 
         // Validate the RPC caller context.
-        $this->validateMethodContext($context, array( "role" => OMV_ROLE_ADMINISTRATOR ));
+        $this->validateMethodContext(
+            $context,
+            array( "role" => OMV_ROLE_ADMINISTRATOR )
+        );
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams(
+            $params,
+            '{
+                "type"       : "object",
+                "properties" : {
+                    "start"     : { "type" : "integer" },
+                    "limit"     : { ' . $GLOBALS["OMV_JSONSCHEMA_COUNTFIELD"] . ' },
+                    "sortfield" : { ' . $GLOBALS["OMV_JSONSCHEMA_SORTFIELD"] . ' },
+                    "sortdir"   : { ' . $GLOBALS["OMV_JSONSCHEMA_SORTDIR"] . ' }
+                }
+            }'
+        );
 
         $leases = array();
-        $exp = "";
+        $exp  = "";
         $name = "";
-        $mac = "";
-        $ip = "";
+        $mac  = "";
+        $ip   = "";
 
         $ints = $xmlConfig->getList("//system/network/interfaces/interface");
 
@@ -212,10 +229,12 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
             list($exp, $mac, $ip, $name) = preg_split('/\s+/', $line);
 
             // Set display name
-            if ($name != '*')
+            if ($name != '*') {
                 $disp = "{$name} ({$ip})";
-            else
+            } else {
                 $disp = $ip;
+                $name = sprintf("%s (%s)", $name, $ip);
+            }
 
             // Calculate expiry
             $exp -= time();
@@ -253,10 +272,6 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
                 'exp'  => $exp
             );
         }
-
-        usort($leases, function($a, $b) {
-            return strnatcasecmp($a['disp'], $b['disp']);
-        });
 
         // Filter result
         return $this->applyFilter($leases, $params['start'], $params['limit'],
@@ -502,5 +517,3 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 // Register the RPC service.
 $rpcServiceMgr = &OMVRpcServiceMgr::getInstance();
 $rpcServiceMgr->registerService(new OMVRpcServiceDnsmasq());
-
-?>
