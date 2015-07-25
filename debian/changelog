@@ -1,6 +1,7 @@
 openmediavault-dnsmasq (2.1) UNRELEASED; urgency=low
 
   * Fix lease listing
+  * Fix lease fill
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 25 Jul 2015 10:39:17 -0500
 

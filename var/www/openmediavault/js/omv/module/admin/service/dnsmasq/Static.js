@@ -194,23 +194,6 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
             triggerAction : "all",
             displayField  : "disp",
             valueField    : "mac",
-            listeners     : {
-                select : function (combo, records) {
-                    var record = records.pop();
-
-                    var ipInfo = record.get("ip");
-                    var macInfo = record.get("mac");
-                    var nameInfo = record.get("name");
-
-                    var ipField = me.findField("ip");
-                    var macField = me.findField("mac");
-                    var nameField = me.findField("name");
-
-                    ipField.setValue(ipInfo);
-                    macField.setValue(macInfo);
-                    nameField.setValue(nameInfo);
-                }
-            },
             store         : Ext.create("OMV.data.Store", {
                 autoLoad : true,
                 model    : OMV.data.Model.createImplicit({
@@ -228,13 +211,28 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
                         service : "Dnsmasq",
                         method  : "getLeases"
                     },
-                    appendSortParams : false
+                    appendSortParams : true
                 },
                 sorters : [{
                     direction : "ASC",
                     property  : "mac"
                 }]
-            })
+            }),
+            listeners     : {
+                select : function (combo, record) {
+                    var ipInfo = record.get("ip");
+                    var macInfo = record.get("mac");
+                    var nameInfo = record.get("name");
+
+                    var ipField = me.findField("ip");
+                    var macField = me.findField("mac");
+                    var nameField = me.findField("name");
+
+                    ipField.setValue(ipInfo);
+                    macField.setValue(macInfo);
+                    nameField.setValue(nameInfo);
+                }
+            }            
         },{
             border : false,
             html   : "<ul>" +
