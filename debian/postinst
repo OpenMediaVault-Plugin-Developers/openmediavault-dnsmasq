@@ -30,6 +30,11 @@ SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 case "$1" in
     configure)
 
+        if [ -z "${2}" ]; then
+            deb-systemd-helper disable ${SERVICE_XPATH_NAME}.service >/dev/null || true
+            deb-systemd-invoke stop ${SERVICE_XPATH_NAME} >/dev/null || true
+        fi
+
         # Check for XML config
         if ! omv_config_exists "${SERVICE_XPATH}"; then
             omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}" ""

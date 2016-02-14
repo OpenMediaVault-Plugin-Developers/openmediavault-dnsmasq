@@ -219,12 +219,12 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
         // This may not exist if DHCP is not enabled
         $xpath = sprintf("%s/dhcp-enable", $this->getXPath());
-        if (FALSE === $xmlConfig->get($xpath)
+        if (FALSE === $xmlConfig->get($xpath)) {
             return $leases;
-
-        if (! file_exists("/var/lib/misc/dnsmasq.leases") )
+        }
+        if ( ! file_exists("/var/lib/misc/dnsmasq.leases") ) {
             return $leases;
-
+        }
         $fp = fopen("/var/lib/misc/dnsmasq.leases", "ro");
 
         if ($fp === false)
@@ -557,7 +557,7 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
         // Validate the RPC caller context.
         $this->validateMethodContext(
             $context,
-            { "role" => OMV_ROLE_ADMINISTRATOR ]
+            [ "role" => OMV_ROLE_ADMINISTRATOR ]
         );
 
         // Validate the parameters of the RPC service method.
