@@ -3,6 +3,7 @@
 # @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
 # @author    Marcel Beck <marcel.beck@mbeck.org>
 # @copyright Copyright (c) 2012 Marcel Beck
+# @copyright Copyright (c) 2013-2016s OpenMediaVault Plugin Developers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,7 +45,5 @@ if [ "$1" = "purge" ]; then
     fi
 
 fi
-
-#DEBHELPER#
 
 exit 0

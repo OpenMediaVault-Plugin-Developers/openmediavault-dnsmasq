@@ -5,7 +5,7 @@
  * @author      OpenMediaVault Plugin Developers <plugins@omv-extras.org>
  * @copyright   Copyright (c) 2011 Ian Moore
  * @copyright   Copyright (c) 2012 Marcel Beck
- * @copyright   Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
+ * @copyright   Copyright (c) 2013-2016 OpenMediaVault Plugin Developers
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -232,7 +232,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entry", {
                     macField.setValue(macInfo);
                     nameField.setValue(nameInfo);
                 }
-            }            
+            }
         },{
             border : false,
             html   : "<ul>" +

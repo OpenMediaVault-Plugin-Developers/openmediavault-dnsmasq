@@ -3,6 +3,7 @@
 # @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
 # @author    Ian Moore <imooreyahoo@gmail.com>
 # @copyright Copyright (c) 2011 Ian Moore
+# @copyright Copyright (c) 2013-2016 OpenMediaVault Plugin Developers
 #
 # This file is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,17 +23,17 @@ set -e
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions
 
-
 DEFAULTS="/etc/default/dnsmasq"
 CONFIG="/etc/dnsmasq.d/omv.conf"
+XPATH="/config/services/dnsmasq"
 
 # Enable/disable service
-if [ "$(omv_config_get "//services/dnsmasq/enable")" != "1" ]; then
-	/etc/init.d/dnsmasq stop || true
-	update-rc.d dnsmasq disable 2>/dev/null || true
+if [ "$(omv_config_get "${XPATH}/enable")" != "1" ]; then
+    systemctl stop dnsmasq || true
+    systemctl disable dnsmasq 2>/dev/null || true
 fi
 
-DOMAIN="$(omv_config_get "//services/dnsmasq/domain-name")"
+DOMAIN="$(omv_config_get "${XPATH}/domain-name")"
 
 ################
 # Defaults file
@@ -55,7 +56,7 @@ DOMAIN_SUFFIX="${DOMAIN}"
 DNSMASQ_OPTS="-h -H /etc/dnsmasq-winshosts -H /etc/dnsmasq-hosts"
 
 # Whether or not to run the dnsmasq daemon; set to 0 to disable.
-ENABLED=$(omv_config_get "//services/dnsmasq/enable")
+ENABLED=$(omv_config_get "${XPATH}/enable")
 
 # By default search this drop directory for configuration options.
 # Libvirt leaves a file here to make the system dnsmasq play nice.
@@ -75,8 +76,8 @@ CONFIG_DIR=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new
 EOF
 
 # Nothing more to do
-if [ "$(omv_config_get "//services/dnsmasq/enable")" != "1" ]; then
-	exit 0
+if [ "$(omv_config_get "${XPATH}/enable")" != "1" ]; then
+    exit 0
 fi
 
 
@@ -113,7 +114,7 @@ domain=${DOMAIN}
 EOF
 
 # DNS logging and extra options
-xmlstarlet sel -t -m "//services/dnsmasq" \
+xmlstarlet sel -t -m "${XPATH}" \
     -i "dns-log-queries != 0" -o "log-queries" -n -b \
     -i "extraoptions != ''" -o "# Extra options" -n \
     -v "extraoptions" -n -b \
@@ -123,28 +124,28 @@ xmlstarlet sel -t -m "//services/dnsmasq" \
 ###############################
 # DHCP options
 ###############################\
-MASK="$(omv_config_get "//services/dnsmasq/network" | awk '{ print $NF }')"
-if [ "$(omv_config_get "//services/dnsmasq/dhcp-enable")" = "1" ]; then
+MASK="$(omv_config_get "${XPATH}/network" | awk '{ print $NF }')"
+if [ "$(omv_config_get "${XPATH}/dhcp-enable")" = "1" ]; then
 
-	xmlstarlet sel -t -m "//services/dnsmasq" \
-		-i "network != ''" -v "concat('dhcp-range=', first-ip, ',', last-ip, ',${MASK},', default-lease-time)" -n \
-		-i "bootfile != ''" -v "concat('dhcp-boot=', bootfile)" -n -b \
-		-i "log-dhcp != 0" -o "log-dhcp" -n -b \
-		-v "concat('dhcp-option=option:router,',gateway)" -n \
-		-o "dhcp-hostsfile=/etc/dnsmasq-dhcphosts" -n \
-		-n ${OMV_CONFIG_FILE} | xmlstarlet unesc >> ${CONFIG}
+    xmlstarlet sel -t -m "${XPATH}" \
+        -i "network != ''" -v "concat('dhcp-range=', first-ip, ',', last-ip, ',${MASK},', default-lease-time)" -n \
+        -i "bootfile != ''" -v "concat('dhcp-boot=', bootfile)" -n -b \
+        -i "log-dhcp != 0" -o "log-dhcp" -n -b \
+        -v "concat('dhcp-option=option:router,',gateway)" -n \
+        -o "dhcp-hostsfile=/etc/dnsmasq-dhcphosts" -n \
+        -n ${OMV_CONFIG_FILE} | xmlstarlet unesc >> ${CONFIG}
 
-	# DHCP Server options
-	DNSDOMAINS=$(omv_config_get "//services/dnsmasq/dns-domains" | sed -e 's/\s*,\s*/,/g');
-	WINS=$(omv_config_get "//services/dnsmasq/wins-servers" | sed -e 's/\s*,\s*/,/g');
-	NTP=$(omv_config_get "//services/dnsmasq/ntp-servers" | sed -e 's/\s*,\s*/,/g');
-	DNS=$(omv_config_get "//services/dnsmasq/dns-servers" | sed -e 's/\s*,\s*/,/g');
+    # DHCP Server options
+    DNSDOMAINS=$(omv_config_get "${XPATH}/dns-domains" | sed -e 's/\s*,\s*/,/g');
+    WINS=$(omv_config_get "${XPATH}/wins-servers" | sed -e 's/\s*,\s*/,/g');
+    NTP=$(omv_config_get "${XPATH}/ntp-servers" | sed -e 's/\s*,\s*/,/g');
+    DNS=$(omv_config_get "${XPATH}/dns-servers" | sed -e 's/\s*,\s*/,/g');
 
-	[ "${DNSDOMAINS}" != "" ] && echo "dhcp-option=option:domain-search,${DNSDOMAINS}" >> ${CONFIG}
-	[ "${DOMAIN}" != "" ] && echo "dhcp-option=15,\"$(echo ${DOMAIN} | sed -e 's/,/ /g')\"" >> ${CONFIG}
-	[ "${WINS}" != "" ] && echo "dhcp-option=44,${WINS}" >> ${CONFIG}
-	[ "${NTP}" != "" ] && echo "dhcp-option=option:ntp-server,${NTP}" >> ${CONFIG}
-	[ "${DNS}" != "" ] && echo "dhcp-option=6,${DNS}" >> ${CONFIG}
+    [ "${DNSDOMAINS}" != "" ] && echo "dhcp-option=option:domain-search,${DNSDOMAINS}" >> ${CONFIG}
+    [ "${DOMAIN}" != "" ] && echo "dhcp-option=15,\"$(echo ${DOMAIN} | sed -e 's/,/ /g')\"" >> ${CONFIG}
+    [ "${WINS}" != "" ] && echo "dhcp-option=44,${WINS}" >> ${CONFIG}
+    [ "${NTP}" != "" ] && echo "dhcp-option=option:ntp-server,${NTP}" >> ${CONFIG}
+    [ "${DNS}" != "" ] && echo "dhcp-option=6,${DNS}" >> ${CONFIG}
 
 fi
 
@@ -156,52 +157,52 @@ DHCPHOSTS="/etc/dnsmasq-dhcphosts"
 TMPDHCPHOSTS="/tmp/dnsmasq-dhcphosts.$$"
 
 if [ -e "${TMPDNSHOSTS}" ]; then
-	echo "${TMPDNSHOSTS} already exists"
-	exit 1
+    echo "${TMPDNSHOSTS} already exists"
+    exit 1
 fi
 
 echo ''>${TMPDNSHOSTS}
 
-DHCPENABLE=$(omv_config_get "//services/dnsmasq/dhcp-enable")
+DHCPENABLE=$(omv_config_get "${XPATH}/dhcp-enable")
 if [ "${DHCPENABLE}" = "1" ]; then
-	if [ -e "${TMPDHCPHOSTS}" ]; then
-		echo "${TMPDHCPHOSTS} already exists"
-		exit 1
-	fi
-	echo ''>${TMPDHCPHOSTS}
+    if [ -e "${TMPDHCPHOSTS}" ]; then
+        echo "${TMPDHCPHOSTS} already exists"
+        exit 1
+    fi
+    echo ''>${TMPDHCPHOSTS}
 fi
 
 # Entries
-index=$(omv_config_get_count "//services/dnsmasq/entries/entry")
+index=$(omv_config_get_count "${XPATH}/entries/entry")
 while [ ${index} -gt 0 ]
 do
 
-	# DNS HOSTS FILE
-	xmlstarlet sel -t -m "//services/dnsmasq/entries/entry[position()=${index}]" \
-		-i "name != ''" -i "ip != ''" -v "concat(ip,'	',name)" -b \
-		${OMV_CONFIG_FILE} >> ${TMPDNSHOSTS}
+    # DNS HOSTS FILE
+    xmlstarlet sel -t -m "${XPATH}/entries/entry[position()=${index}]" \
+        -i "name != ''" -i "ip != ''" -v "concat(ip,'   ',name)" -b \
+        ${OMV_CONFIG_FILE} >> ${TMPDNSHOSTS}
 
-	# CNAMES
-	CHOST=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/name")
-	if [ "${CHOST}" != "" ]; then
-		CNAMES=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/cnames" | sed -e 's/\s*,\s*/\n/g')
-		for cname in $CNAMES; do
-			echo "cname=${cname},${CHOST}" >> ${CONFIG}
-			echo "cname=${cname}.${DOMAIN},${CHOST}.${DOMAIN}" >> ${CONFIG}
-		done
-	fi
+    # CNAMES
+    CHOST=$(omv_config_get "${XPATH}/entries/entry[position()=${index}]/name")
+    if [ "${CHOST}" != "" ]; then
+        CNAMES=$(omv_config_get "${XPATH}/entries/entry[position()=${index}]/cnames" | sed -e 's/\s*,\s*/\n/g')
+        for cname in $CNAMES; do
+            echo "cname=${cname},${CHOST}" >> ${CONFIG}
+            echo "cname=${cname}.${DOMAIN},${CHOST}.${DOMAIN}" >> ${CONFIG}
+        done
+    fi
 
-	# DHCP FILE
-	if [ "${DHCPENABLE}" = "1" ]; then
-		MAC=$(omv_config_get "//services/dnsmasq/entries/entry[position()=${index}]/mac")
-		if [ "${MAC}" != "" ]; then
-			xmlstarlet sel -t -m "//services/dnsmasq/entries/entry[position()=${index}]" \
-				-i "mac != ''" -i "ip != ''" -v "concat(mac, ',', ip)" -b \
-				${OMV_CONFIG_FILE} >> ${TMPDHCPHOSTS}
-		fi
-	fi
+    # DHCP FILE
+    if [ "${DHCPENABLE}" = "1" ]; then
+        MAC=$(omv_config_get "${XPATH}/entries/entry[position()=${index}]/mac")
+        if [ "${MAC}" != "" ]; then
+            xmlstarlet sel -t -m "${XPATH}/entries/entry[position()=${index}]" \
+                -i "mac != ''" -i "ip != ''" -v "concat(mac, ',', ip)" -b \
+                ${OMV_CONFIG_FILE} >> ${TMPDHCPHOSTS}
+        fi
+    fi
 
-	index=$(( ${index} - 1 ))
+    index=$(( ${index} - 1 ))
 done
 
 /bin/mv ${TMPDNSHOSTS} ${DNSHOSTS}
@@ -209,9 +210,8 @@ done
 
 # If wins support isn't enabled, clear hosts file
 # if it doesn't exist, create it
-if [ $(omv_config_get "//services/dnsmasq/dns-wins") != "1" ] || [ ! -e /etc/dnsmasq-winshosts ]; then
-	echo ''>/etc/dnsmasq-winshosts
+if [ $(omv_config_get "${XPATH}/dns-wins") != "1" ] || [ ! -e /etc/dnsmasq-winshosts ]; then
+    echo ''>/etc/dnsmasq-winshosts
 fi
 
-update-rc.d dnsmasq enable
-update-rc.d dnsmasq defaults 2>/dev/null
+systemctl enable dnsmasq

@@ -9,6 +9,8 @@ Homepage: http://omv-extras.org/
 
 Package: openmediavault-dnsmasq
 Architecture: all
-Depends: ${misc:Depends}, openmediavault (>= 2.1), dnsmasq
+Depends: dnsmasq,
+         openmediavault (>= 3.0.9),
+         ${misc:Depends}
 Description: OpenMediaVault dnsmasq (local DNS and DHCP server) plugin
  Configure local DNS and DHCP through OpenMediaVault

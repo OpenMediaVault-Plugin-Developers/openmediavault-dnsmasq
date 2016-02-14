@@ -1,4 +1,10 @@
-openmediavault-dnsmasq (2.1) UNRELEASED; urgency=low
+openmediavault-dnsmasq (3.0) stable; urgency=low
+
+  * Update for OMV 3.0
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 13 Feb 2016 19:04:33 -0600
+
+openmediavault-dnsmasq (2.2) stable; urgency=low
 
   * Fix lease listing
   * Fix lease fill

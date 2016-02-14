@@ -4,7 +4,7 @@
 # @author    Marcel Beck <marcel.beck@mbeck.org>
 # @copyright Copyright (c) 2012 Marcel Beck
 # @copyright Copyright (c) 2009-2013 Volker Theile
-# @copyright Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
+# @copyright Copyright (c) 2013-2016 OpenMediaVault Plugin Developers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,78 +33,27 @@ case "$1" in
         # Check for XML config
         if ! omv_config_exists "${SERVICE_XPATH}"; then
             omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/dhcp-enable"; then
-                omv_config_add_element "${SERVICE_XPATH}" "dhcp-enable" "0"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/extraoptions"; then
-                omv_config_add_element "${SERVICE_XPATH}" "extraoptions" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/domain-name"; then
-                omv_config_add_element "${SERVICE_XPATH}" "domain-name" "local"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/network"; then
-                omv_config_add_element "${SERVICE_XPATH}" "network" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/gateway"; then
-                omv_config_add_element "${SERVICE_XPATH}" "gateway" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/first-ip"; then
-                omv_config_add_element "${SERVICE_XPATH}" "first-ip" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/last-ip"; then
-                omv_config_add_element "${SERVICE_XPATH}" "last-ip" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/default-lease-time"; then
-                omv_config_add_element "${SERVICE_XPATH}" "default-lease-time" "168h"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/wins-servers"; then
-                omv_config_add_element "${SERVICE_XPATH}" "wins-servers" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/ntp-servers"; then
-                omv_config_add_element "${SERVICE_XPATH}" "ntp-servers" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/bootfile"; then
-                omv_config_add_element "${SERVICE_XPATH}" "bootfile" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/dns-log-queries"; then
-                omv_config_add_element "${SERVICE_XPATH}" "dns-log-queries" "0"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/log-dhcp"; then
-                omv_config_add_element "${SERVICE_XPATH}" "log-dhcp" "0"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/dns-wins"; then
-                omv_config_add_element "${SERVICE_XPATH}" "dns-wins" "0"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/enable"; then
-                omv_config_add_element "${SERVICE_XPATH}" "enable" "0"
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/entries"; then
-                omv_config_add_element "${SERVICE_XPATH}" "entries" ""
-        fi
-
-        if ! omv_config_exists "${SERVICE_XPATH}/dns-servers"; then
-                omv_config_add_element "${SERVICE_XPATH}" "dns-servers" ""
+            omv_config_add_element "${SERVICE_XPATH}" "dhcp-enable" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "extraoptions" ""
+            omv_config_add_element "${SERVICE_XPATH}" "domain-name" "local"
+            omv_config_add_element "${SERVICE_XPATH}" "network" ""
+            omv_config_add_element "${SERVICE_XPATH}" "gateway" ""
+            omv_config_add_element "${SERVICE_XPATH}" "first-ip" ""
+            omv_config_add_element "${SERVICE_XPATH}" "last-ip" ""
+            omv_config_add_element "${SERVICE_XPATH}" "default-lease-time" "168h"
+            omv_config_add_element "${SERVICE_XPATH}" "wins-servers" ""
+            omv_config_add_element "${SERVICE_XPATH}" "ntp-servers" ""
+            omv_config_add_element "${SERVICE_XPATH}" "bootfile" ""
+            omv_config_add_element "${SERVICE_XPATH}" "dns-log-queries" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "log-dhcp" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "dns-wins" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "enable" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "entries" ""
+            omv_config_add_element "${SERVICE_XPATH}" "dns-servers" ""
         fi
 
         # Reload rsyslogd so that it sees the new config file
-        /etc/init.d/rsyslog restart
+        deb-systemd-invoke restart rsyslog
 
         chown root /usr/sbin/dnsmasq_wins
         chmod 0700 /usr/sbin/dnsmasq_wins
@@ -116,7 +65,7 @@ case "$1" in
 
         # Run config and restart dnsmasq
         omv-mkconf dnsmasq 2>/dev/null
-        /etc/init.d/dnsmasq restart || true
+        deb-systemd-invoke restart dnsmasq || true
 
         dpkg-trigger update-fixperms
         dpkg-trigger update-locale
@@ -130,7 +79,5 @@ case "$1" in
         exit 1
     ;;
 esac
-
-#DEBHELPER#
 
 exit 0
