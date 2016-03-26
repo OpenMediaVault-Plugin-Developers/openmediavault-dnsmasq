@@ -179,7 +179,7 @@ do
 
     # DNS HOSTS FILE
     xmlstarlet sel -t -m "${XPATH}/entries/entry[position()=${index}]" \
-        -i "name != ''" -i "ip != ''" -v "concat(ip,'   ',name)" -b \
+        -i "name != ''" -i "ip != ''" -v "concat(ip,'   ',name)" -n -b \
         ${OMV_CONFIG_FILE} >> ${TMPDNSHOSTS}
 
     # CNAMES

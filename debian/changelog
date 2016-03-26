@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.0.1) stable; urgency=low
+
+  * Fix dnsmasq-hosts file creation
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 26 Mar 2016 17:57:20 -0500
+
 openmediavault-dnsmasq (3.0) stable; urgency=low
 
   * Update for OMV 3.0
