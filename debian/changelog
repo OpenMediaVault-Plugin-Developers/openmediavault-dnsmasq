@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.0.2) stable; urgency=low
+
+  * Changed dependency of OMV Package to = 3.0.13 to avoid accidental user updates
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 05 Apr 2016 16:06:41 -0400
+
 openmediavault-dnsmasq (3.0.1) stable; urgency=low
 
   * Fix dnsmasq-hosts file creation
