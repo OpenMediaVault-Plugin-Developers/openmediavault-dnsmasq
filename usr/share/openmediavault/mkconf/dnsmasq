@@ -197,7 +197,7 @@ do
         MAC=$(omv_config_get "${XPATH}/entries/entry[position()=${index}]/mac")
         if [ "${MAC}" != "" ]; then
             xmlstarlet sel -t -m "${XPATH}/entries/entry[position()=${index}]" \
-                -i "mac != ''" -i "ip != ''" -v "concat(mac, ',', ip)" -b \
+                -i "mac != ''" -i "ip != ''" -v "concat(mac, ',', ip)" -n -b \
                 ${OMV_CONFIG_FILE} >> ${TMPDHCPHOSTS}
         fi
     fi

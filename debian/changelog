@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.0.3) stable; urgency=low
+
+  * Fix dhcphosts config file
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 09 Apr 2016 08:05:26 -0500
+
 openmediavault-dnsmasq (3.0.2) stable; urgency=low
 
   * Changed dependency of OMV Package to = 3.0.13 to avoid accidental user updates
