@@ -22,171 +22,55 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-require_once("openmediavault/object.inc");
-require_once("openmediavault/config.inc");
-require_once("openmediavault/error.inc");
-require_once("openmediavault/util.inc");
-require_once("openmediavault/rpcservice.inc");
-require_once("openmediavault/notify.inc");
 
-class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
-
-    /**
-     * Get the RPC service name.
-     */
-    public function getName() {
-        return "Dnsmasq";
-    }
-
-    private function getPluginName()
+class OMVRpcServiceDnsmasq extends \OMV\Rpc\ServiceAbstract
+{
+    public function getName()
     {
-        return strtolower($this->getName());
+        return 'Dnsmasq';
     }
 
-    private function getXPath()
-    {
-        return sprintf("/config/services/%s", $this->getPluginName());
-    }
-
-    /**
-     * Initialize the RPC service.
-     */
     public function initialize()
     {
-        $this->registerMethod("getSettings");
-        $this->registerMethod("setSettings");
-        $this->registerMethod("getLeases");
-        $this->registerMethod("getNetworks");
-        $this->registerMethod("getEntries");
-        $this->registerMethod("getEntry");
-        $this->registerMethod("setEntry");
-        $this->registerMethod("deleteEntry");
+        $this->registerMethod('getSettings');
+        $this->registerMethod('setSettings');
+        $this->registerMethod('getLeases');
+        $this->registerMethod('getNetworks');
+        $this->registerMethod('getEntryList');
+        $this->registerMethod('getEntry');
+        $this->registerMethod('setEntry');
+        $this->registerMethod('deleteEntry');
     }
 
-    /**
-     * Get the settings configuration object.
-     * @param params The method parameters.
-     * @param context The context of the caller.
-     * @return The requested configuration object.
-     * @throw E_CONFIG_GET_OBJECT_FAILED
-     */
     public function getSettings($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Get the configuration object.
-        $object = $xmlConfig->get($this->getXPath());
-        if(is_null($object))
-            throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED, $xpath);
-
-        // Modify the result object.
-        $object['enable']          = boolval($object['enable']);
-        $object['dhcp-enable']     = boolval($object['dhcp-enable']);
-        $object['dns-log-queries'] = boolval($object['dns-log-queries']);
-        $object['log-dhcp']        = boolval($object['log-dhcp']);
-        $object['dns-wins']        = boolval($object['dns-wins']);
-
-        // Remove useless fields from the result object.
-        unset($object['entries']);
-
-        return $object;
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get('conf.service.dnsmasq');
+        // Remove useless properties from the object.
+        $object->remove('entries');
+        return $object->getAssoc();
     }
 
-    /**
-     * Set the settings configuration object.
-     * @param params The method parameters.
-     * @param context The context of the caller.
-     * @return The stored configuration object.
-     * @throw E_CONFIG_GET_OBJECT_FAILED
-     * @throw E_CONFIG_SET_OBJECT_FAILED
-     */
     public function setSettings($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"       : "object",
-            "properties" : {
-                "enable"             : { "type" : "boolean" },
-                "dns-log-queries"    : { "type" : "boolean" },
-                "dhcp-enable"        : { "type" : "boolean" },
-                "dns-wins"           : { "type" : "boolean" },
-                "log-dhcp"           : { "type" : "boolean" },
-                "domain-name"        : { "type" : "string", "optional" : true},
-                "bootfile"           : { "type" : "string", "optional" : true},
-                "gateway"            : { "type" : "string"},
-                "default-lease-time" : { "type" : "string"},
-                "ntp-servers"        : { "type" : "string", "optional" : true},
-                "dns-domains"        : { "type" : "string", "optional" : true},
-                "wins-servers"       : { "type" : "string", "optional" : true},
-                "dns-servers"        : { "type" : "string", "optional" : true},
-                "network"            : { "type" : "string", "optional" : true},
-                "first-ip"           : { "type" : "string", "optional" : true},
-                "last-ip"            : { "type" : "string", "optional" : true},
-                "extraoptions"       : { "type" : "string", "optional" : true}
-            }
-        }');
-
+        $this->validateMethodParams($params, 'rpc.dnsmasq.setsettings');
         // Get the existing configuration object.
-        $oldObject = $xmlConfig->get( $this->getXPath() );
-        if(is_null($oldObject)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $this->getXPath()
-            );
-        }
-
-        // Update the configuration object.
-        $object = [
-            "enable"             => array_boolval($params, 'enable'),
-            "dns-log-queries"    => array_boolval($params, 'dns-log-queries'),
-            "dhcp-enable"        => array_boolval($params, 'dhcp-enable'),
-            "dns-wins"           => array_boolval($params, 'dns-wins'),
-            "log-dhcp"           => array_boolval($params, 'log-dhcp'),
-            "domain-name"        => $params['domain-name'],
-            "bootfile"           => $params['bootfile'],
-            "gateway"            => $params['gateway'],
-            "default-lease-time" => $params['default-lease-time'],
-            "ntp-servers"        => $params['ntp-servers'],
-            "dns-domains"        => $params['dns-domains'],
-            "wins-servers"       => $params['wins-servers'],
-            "dns-servers"        => $params['dns-servers'],
-            "network"            => $params['network'],
-            "first-ip"           => $params['first-ip'],
-            "last-ip"            => $params['last-ip'],
-            "extraoptions"       => $params['extraoptions'],
-            "entries"            => isset($oldObject['entries']) ? $oldObject['entries'] : []
-        ];
-
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get('conf.service.dnsmasq');
+        $object->setAssoc($params);
         // DHCP isn't enabled if dnsmasq isn't enabled
-        $object['dhcp-enable'] = ($object['enable'] && $object['dhcp-enable']);
-
-        if(FALSE === $xmlConfig->replace($this->getXPath(), $object)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED
-            );
-        }
-
-        // Notify configuration changes.
-        $dispatcher = &OMVNotifyDispatcher::getInstance();
-        $dispatcher->notify(OMV_NOTIFY_MODIFY,
-            "org.openmediavault.services.dnsmasq", $object);
-
+        $object->set('dhcp-enable', $params['enable'] && $params['dhcp-enable']);
+        $db->set($object);
+        // Remove useless properties from the object.
+        $object->remove('entries');
         // Return the configuration object.
-        return $object;
+        return $object->getAssoc();
     }
 
     /**
@@ -201,31 +85,27 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
      */
      public function getLeases($params, $context)
      {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
 
         $leases = [];
-        $exp  = "";
-        $name = "";
-        $mac  = "";
-        $ip   = "";
+        $exp  = '';
+        $name = '';
+        $mac  = '';
+        $ip   = '';
 
-        $ints = $xmlConfig->getList("/config/system/network/interfaces/interface");
+        // Get the configuration object.
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get('conf.service.dnsmasq');
 
         // This may not exist if DHCP is not enabled
-        $xpath = sprintf("%s/dhcp-enable", $this->getXPath());
-        if (FALSE === $xmlConfig->get($xpath)) {
+        if (false === $object->get('dhcp-enable')) {
             return $leases;
         }
-        if ( ! file_exists("/var/lib/misc/dnsmasq.leases") ) {
+        if ( ! file_exists('/var/lib/misc/dnsmasq.leases') ) {
             return $leases;
         }
-        $fp = fopen("/var/lib/misc/dnsmasq.leases", "ro");
+        $fp = fopen('/var/lib/misc/dnsmasq.leases', 'ro');
 
         if ($fp === false)
             return $leases;
@@ -242,10 +122,10 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
             // Set display name
             if ($name != '*') {
-                $disp = "{$name} ({$ip})";
+                $disp = sprintf('%s (%s)', $name, $ip);
             } else {
                 $disp = $ip;
-                $name = sprintf("%s (%s)", $name, $ip);
+                $name = sprintf('%s (%s)', $name, $ip);
             }
 
             // Calculate expiry
@@ -263,17 +143,17 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
                 $mins = floor($exp / 60);
 
-                $exp = array();
+                $exp = [];
                 if ($days > 0)
-                    $exp[] = "{$days} day(s)";
+                    $exp[] = sprintf('%s days(s)', $days);
 
                 if ($hours > 0)
-                    $exp[] = "{$hours} hour(s)";
+                    $exp[] = sprintf('%s hour(s)', $hours);
 
                 if ($mins > 0)
-                    $exp[] = "{$mins} minute(s)";
+                    $exp[] = sprintf('%s minutes(s)', $mins);
 
-                $exp = implode(", ", $exp);
+                $exp = implode(', ', $exp);
             }
 
             $leases[] = [
@@ -292,292 +172,90 @@ class OMVRpcServiceDnsmasq extends OMVRpcServiceAbstract {
 
     /**
      * Get a list of static networks for this machine.
-     *
-     * @return array networks
      */
     public function getNetworks($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Get the configuration object.
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->get('conf.system.network.interface');
 
         $nets = [];
-        $ints = $xmlConfig->getList("//system/network/interfaces/interface");
-
-        foreach ($ints as $i) {
-            if (! ($i['netmask'] && $i['address']))
+        foreach ($objects as $objectk => &$objectv) {
+            if (! ($objectv->get('netmask') && $objectv->get('address')))
                 continue;
 
-            $netid = long2ip(ip2long($i['address']) & ip2long($i['netmask'])) . " / {$i['netmask']}";
+            $netid = long2ip(ip2long($objectv->get('address')) & ip2long($objectv->get('netmask'))) . ' / ' . $objectv->get('netmask');
             $nets[$netid] = $netid;
         }
-
         $networks = [];
         foreach ($nets as $n) {
-            $networks[] = [ 'netid'=> $n ];
+            $networks[] = [ 'netid' => $n ];
         }
-
+        // Filter result
         return $networks;
     }
 
-    /**
-     * Get list of Entries
-     *
-     * @param $start     integer start point in paging list
-     * @param $count     integer number of objects to return in paged list
-     * @param $sortField string field to sort on
-     * @param $sortDir   integer sort direction
-     *
-     * @return array list of Entries
-     */
-    public function getEntries($params, $context)
+    public function getEntryList($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"       : "object",
-            "properties" : {
-                "start"     : { "type" : "integer" },
-                "limit"     : { '.$GLOBALS['OMV_JSONSCHEMA_COUNTFIELD'].' },
-                "sortfield" : { '.$GLOBALS['OMV_JSONSCHEMA_SORTFIELD'].' },
-                "sortdir"   : { '.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].' }
-            }
-        }');
-
-        // Get the configuration object.
-        $xpath = sprintf("%s/entries/entry", $this->getXPath());
-        $objects = $xmlConfig->getList($xpath);
-        if(is_null($objects)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $xpath
-            );
-        }
-        // Filter the result.
-        return $this->applyFilter($objects, $params['start'],
-            $params['limit'], $params['sortfield'], $params['sortdir']);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+        // Get the list of configuration objects.
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->getAssoc('conf.service.dnsmasq.entry');
+        // Filter the result objects.
+        return $this->applyFilter($objects, $params['start'], $params['limit'],
+            $params['sortfield'], $params['sortdir']);
     }
 
-    /**
-     * Get a single Entry's configuration
-     *
-     * @param $uuid string configuration uuid of Entry
-     *
-     * @return array Entry configuration data
-     */
     public function getEntry($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"       : "object",
-            "properties" : {
-                "uuid" : { '.$GLOBALS['OMV_JSONSCHEMA_UUID'].' }
-            }
-        }');
-
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
         // Get the configuration object.
-        $xpath = sprintf("%s/entries/entry[uuid='%s']",
-            $this->getXPath(), $params['uuid']
-        );
-        $object = $xmlConfig->get($xpath);
-        if(is_null($object)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $xpath
-            );
-        }
-
-        return $object;
+        $db = \OMV\Config\Database::getInstance();
+        return $db->getAssoc('conf.service.dnsmasq.entry', $params['uuid']);
     }
 
-    /**
-     * Save Entry configuration data
-     *
-     * @param $data array Entry configuration
-     */
     public function setEntry($params, $context)
     {
-        global $xmlConfig;
-
         // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"        : "object",
-            "properties"  : {
-                "uuid"   : { '.$GLOBALS['OMV_JSONSCHEMA_UUID_UNDEFINED'].' },
-                "ip"     : { "type" : "string", "optional" : true },
-                "name"   : { "type" : "string", "optional" : true },
-                "cnames" : { "type" : "string", "optional" : true },
-                "mac"    : { "type" : "string", "optional" : true }
-            }
-        }');
-
-        // Prepare configuration data.
-        $object = [
-            "uuid"   => ($params['uuid'] == $GLOBALS['OMV_UUID_UNDEFINED']) ? OMVUtil::uuid() : $params['uuid'],
-            "ip"     => $params['ip'],
-            "name"   => strtolower($params['name']),
-            "cnames" => strtolower($params['cnames']),
-            "mac"    => strtolower($params['mac'])
-        ];
-
-        // Set the configuration data.
-        $success = FALSE;
-
-        // Check uniqueness
-        $xpath = sprintf("%s/entries/entry[name='{%s}']",
-            $this->getXPath(),$object['name']
-        );
-        if (! empty($object['name']) && TRUE === $xmlConfig->exists($xpath)) {
-
-            $xpath = sprintf("%s/entries/entry[name='{%s}']",
-                $this->getXPath(), $object['name']
-            );
-            $ex = $xmlConfig->get($xpath);
-
-            if ($ex['uuid'] != $object['uuid'] && $ex['ip'] == $data['ip']) {
-                throw new OMVException(
-                    OMVErrorMsg::E_CONFIG_OBJECT_UNIQUENESS
-                );
-            }
+        $this->validateMethodParams($params, 'rpc.dnsmasq.setentry');
+        // Prepare the configuration object.
+        $object = new \OMV\Config\ConfigObject('conf.service.dnsmasq.entry');
+        $object->setAssoc($params);
+        // Set the configuration object.
+        $isNew = $object->isNew();
+        $db = \OMV\Config\Database::getInstance();
+        if (TRUE === $isNew) {
+            // Check uniqueness - cnames, ip, name
+            $db->assertIsUnique($object, 'cnames');
+            $db->assertIsUnique($object, 'ip');
+            $db->assertIsUnique($object, 'name');
         }
-
-        // Check uniqueness
-        $xpath = sprintf("%s/entries/entry[ip='{%s}']",
-            $this->getXPath(),$object['ip']
-        );
-        if (! empty($data['mac']) && TRUE === $xmlConfig->exists($xpath)) {
-
-            $xpath = sprintf("%s/entries/entry[ip='{%s}']",
-                $this->getXPath(), $object['ip']
-            );
-            $ex = $xmlConfig->get($xpath);
-
-            if ($ex['uuid'] != $object['uuid'] && $ex['mac'] == $data['mac']) {
-                throw new OMVException(
-                    OMVErrorMsg::E_CONFIG_OBJECT_UNIQUENESS
-                );
-            }
-        }
-
-        // CNAMES must be unique
-        if (! empty($object['cnames'])) {
-            $cnames = str_replace(array(" ", "'", '"', '/', '\\'), '', trim($object['cnames']));
-            $cnames = preg_replace('/\s*,\s*/', ', ', $cnames);
-            $cnames = array_unique(explode(', ', $cnames));
-
-            foreach ($cnames as $cname) {
-                // check for exact name
-                $xpath = sprintf("%s/entries/entry[name='{%s}']",
-                    $this->getXPath(), $cname
-                );
-                try {
-                    $ex = $xmlConfig->get($xpath);
-                } catch (Exception $e) {
-                    // ignore
-                    $ex = null;
-                }
-
-                if ($ex && $ex['uuid'] != $object['uuid'])
-                    throw new Exception("An entry with the host name (or other names) '{$cname}' already exists.");
-
-                $xpath = sprintf("%s/entries/entry[contains(cnames, '{%s}')]",
-                    $this->getXPath(), $cname
-                );
-                $exnames = $xmlConfig->getList($xpath);
-
-                foreach ($exnames as $ex) {
-                    // Skip ourselves
-                    if ($object['uuid'] == $ex['uuid'])
-                        continue;
-
-                    if (preg_match("/(^|\s){$cname}(,|$)/", $ex['cnames']))
-                        throw new Exception("An entry with the host name (or other names) '{$cname}' already exists.");
-                }
-            }
-
-            $object['cnames'] = implode(', ', $cnames);
-        }
-
-        // Set configuration data
-        if ($params['uuid'] == $GLOBALS['OMV_UUID_UNDEFINED']) {
-            // Append the configuration object.
-            $xpath = sprintf("%s/entries", $this->getXPath());
-            $success = $xmlConfig->set($xpath, [ "entry" => $object ]);
-        } else {
-            // Update the existing configuration object.
-            $xpath = sprintf("%s/entries/entry[uuid='{%s}']", $this->getXPath(), $params['uuid']);
-            $success = $xmlConfig->replace($xpath, $object);
-        }
-
-        if(FALSE === $success)
-            throw new OMVException(OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED);
-
-        // Notify configuration changes.
-        $dispatcher = &OMVNotifyDispatcher::getInstance();
-        $dispatcher->notify(($params['uuid'] == $GLOBALS['OMV_UUID_UNDEFINED']) ?
-            OMV_NOTIFY_CREATE : OMV_NOTIFY_MODIFY,
-            "org.openmediavault.services.dnsmasq.entries.entry", $object);
-
+        $db->set($object);
         // Return the configuration object.
-        return $object;
+        return $object->getAssoc();
     }
 
-    /**
-     * Remove Entry from config
-     *
-     * @param string $uuid configuration uuid of Entry
-     */
     public function deleteEntry($params, $context)
     {
-        // Validate the RPC caller context.
-        $this->validateMethodContext(
-            $context,
-            [ "role" => OMV_ROLE_ADMINISTRATOR ]
-        );
-
+       // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, '{
-            "type"       : "object",
-            "properties" : {
-                "uuid" : { '.$GLOBALS['OMV_JSONSCHEMA_UUID'].' }
-            }
-        }');
-
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
         // Delete the configuration object.
-        $xpath = sprintf("%s/entries/entry[uuid='%s']", $this->getXPath(), $params['uuid']);
-        $object = $this->deleteConfigObjectByPath($xpath,
-            "org.openmediavault.services.dnsmasq.entries.entry");
-
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get('conf.service.dnsmasq.entry', $params['uuid']);
+        $db->delete($object);
         // Return the deleted configuration object.
-        return $object;
+        return $object->getAssoc();
     }
 }
-
-// Register the RPC service.
-$rpcServiceMgr = &OMVRpcServiceMgr::getInstance();
-$rpcServiceMgr->registerService(new OMVRpcServiceDnsmasq());

@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.1) stable; urgency=low
+
+  * Port to datamodels
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 23 Dec 2016 10:00:55 -0600
+
 openmediavault-dnsmasq (3.0.3) stable; urgency=low
 
   * Fix dhcphosts config file

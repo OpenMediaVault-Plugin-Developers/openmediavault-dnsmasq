@@ -1,0 +1,98 @@
+{
+	"type": "config",
+	"id": "conf.service.dnsmasq",
+	"title": "DNSMasq",
+	"queryinfo": {
+		"xpath": "//services/dnsmasq",
+		"iterable": false
+	},
+	"properties": {
+		"enable": {
+			"type": "boolean",
+			"default": false
+		},
+		"dns-log-queries": {
+			"type": "boolean",
+			"default": false
+		},
+		"dhcp-enable": {
+			"type": "boolean",
+			"default": false
+		},
+		"dns-wins": {
+			"type": "boolean",
+			"default": false
+		},
+		"log-dhcp": {
+			"type": "boolean",
+			"default": false
+		},
+		"domain-name": {
+			"type": "string",
+			"default": "local"
+		},
+		"bootfile": {
+			"type": "string"
+		},
+		"gateway": {
+			"type": "string"
+		},
+		"default-lease-time": {
+			"type": "string",
+			"default": "168h"
+		},
+		"ntp-servers": {
+			"type": "string"
+		},
+		"dns-domains": {
+			"type": "string"
+		},
+		"wins-servers": {
+			"type": "string"
+		},
+		"dns-servers": {
+			"type": "string"
+		},
+		"network": {
+			"type": "string"
+		},
+		"first-ip": {
+			"type": "string"
+		},
+		"last-ip": {
+			"type": "string"
+		},
+		"extraoptions": {
+			"type": "string"
+		},
+		"entries": {
+			"type": "object",
+			"properties": {
+				"entry": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"uuid": {
+								"type": "string",
+								"format": "uuidv4"
+							},
+							"ip": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"cnames": {
+								"type": "string"
+							},
+							"mac": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

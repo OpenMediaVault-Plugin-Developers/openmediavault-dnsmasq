@@ -1,0 +1,105 @@
+[{
+	"type": "rpc",
+	"id": "rpc.dnsmasq.setsettings",
+	"params": {
+		"type": "object",
+		"properties": {
+		    "enable": {
+		        "type": "boolean",
+		        "required": true
+		    },
+			"dns-log-queries": {
+				"type": "boolean",
+		        "required": true
+			},
+			"dhcp-enable": {
+				"type": "boolean",
+		        "required": true
+			},
+			"dns-wins": {
+				"type": "boolean",
+		        "required": true
+			},
+			"log-dhcp": {
+				"type": "boolean",
+		        "required": true
+			},
+			"domain-name": {
+				"type": "string",
+		        "required": false
+			},
+			"bootfile": {
+				"type": "string",
+		        "required": false
+			},
+			"gateway": {
+				"type": "string"
+			},
+			"default-lease-time": {
+				"type": "string",
+		        "required": true
+			},
+			"ntp-servers": {
+				"type": "string",
+		        "required": false
+			},
+			"dns-domains": {
+				"type": "string",
+		        "required": false
+			},
+			"wins-servers": {
+				"type": "string",
+		        "required": false
+			},
+			"dns-servers": {
+				"type": "string",
+		        "required": false
+			},
+			"network": {
+				"type": "string",
+		        "required": false
+			},
+			"first-ip": {
+				"type": "string",
+		        "required": false
+			},
+			"last-ip": {
+				"type": "string",
+		        "required": false
+			},
+			"extraoptions": {
+				"type": "string",
+		        "required": false
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.dnsmasq.setentry",
+	"params": {
+		"type": "object",
+		"properties": {
+			"uuid": {
+				"type": "string",
+				"format": "uuidv4",
+				"required": true
+			},
+			"ip": {
+				"type": "string",
+				"required": false
+			},
+			"name": {
+				"type": "string",
+				"required": false
+			},
+			"cnames": {
+				"type": "string",
+				"required": false
+			},
+			"mac": {
+			    "type": "string",
+				"required": false
+			}
+		}
+	}
+}]

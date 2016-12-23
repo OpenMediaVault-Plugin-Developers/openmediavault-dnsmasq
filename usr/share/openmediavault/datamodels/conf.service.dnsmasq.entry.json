@@ -1,0 +1,28 @@
+{
+	"type": "config",
+	"id": "conf.service.dnsmasq.entry",
+	"title": "DNSMasq entry",
+	"queryinfo": {
+		"xpath": "//services/dnsmasq/entries/entry",
+		"iterable": true,
+		"idproperty": "uuid"
+	},
+	"properties": {
+		"uuid": {
+			"type": "string",
+			"format": "uuidv4"
+		},
+		"ip": {
+			"type": "string"
+		},
+		"name": {
+			"type": "string"
+		},
+		"cnames": {
+			"type": "string"
+		},
+		"mac": {
+			"type": "string"
+		}
+	}
+}

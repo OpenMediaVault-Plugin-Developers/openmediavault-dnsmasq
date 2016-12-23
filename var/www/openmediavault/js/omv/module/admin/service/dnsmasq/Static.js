@@ -82,7 +82,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Entries", {
                     type    : "rpc",
                     rpcData : {
                         service : "Dnsmasq",
-                        method  : "getEntries"
+                        method  : "getEntryList"
                     }
                 }
             })

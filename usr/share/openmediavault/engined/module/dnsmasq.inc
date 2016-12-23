@@ -23,125 +23,76 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-require_once("openmediavault/module.inc");
-require_once("openmediavault/config.inc");
-require_once("openmediavault/error.inc");
-require_once("openmediavault/util.inc");
-require_once("openmediavault/initscript.inc");
-require_once("openmediavault/log.inc");
 
-class OMVModuleDnsmasq extends OMVModuleServiceAbstract
-    implements OMVINotifyListener, OMVIModuleServiceStatus
+class OMVModuleDnsmasq extends \OMV\Engine\Module\ServiceAbstract
+    implements \OMV\Engine\Notify\IListener, \OMV\Engine\Module\IServiceStatus
 {
-
-    /**
-     * Get the module name.
-     */
     public function getName()
     {
         return "dnsmasq";
     }
 
-    private function getPluginName()
-    {
-        return strtolower($this->getName());
-    }
-
-    private function getXPath()
-    {
-        return sprintf("/config/services/%s", $this->getPluginName());
-    }
-
     public function applyConfig()
     {
-        global $xmlConfig;
+        $cmd = new \OMV\System\Process("omv-mkconf", "dnsmasq");
+        $cmd->setRedirect2to1();
+        $cmd->execute();
 
-        $cmd = "omv-mkconf dnsmasq 2>&1";
-        if(0 !== $this->exec($cmd, $output)) {
-            throw new OMVException(
-                OMVErrorMsg::E_EXEC_FAILED,
-                $cmd,
-                implode(PHP_EOL, $output)
-            );
-        }
-
-        // Restart samba enabling dnsmasq or enabling dns-wins - not sure how
-        $object = $xmlConfig->get( $this->getXPath() );
-        if(is_null($object)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $this->getXPath()
-            );
-        }
-
-        if(FALSE === boolval($object['enable']))
-            return;
-
-        $systemCtl = new OMVSystemCtl($this->getPluginName());
+        $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
         $systemCtl->restart();
     }
 
     public function stopService()
     {
-        $systemCtl = new OMVSystemCtl($this->getPluginName());
-        $systemCtl->disable(true);
+        $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
+        $systemCtl->disable(TRUE);
     }
 
-    /**
-     * Start the managed service.
-     * @throw E_CONFIG_GET_OBJECT_FAILED
-     */
     public function startService()
     {
-        global $xmlConfig;
-
-        $object = $xmlConfig->get( $this->getXPath() );
-        if(is_null($object)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $this->getXPath()
-            );
-        }
-        if(FALSE === boolval($object['enable']))
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get("conf.service.dnsmasq");
+        if (TRUE !== $object->get("enable"))
             return;
-
-        $systemCtl = new OMVSystemCtl($this->getPluginName());
-        $systemCtl->enable(true);
+        // Start this service and enable the unit file.
+        $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
+        $systemCtl->enable(TRUE);
     }
 
+    public function getStatus()
+    {
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get("conf.service.dnsmasq");
+        $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
+        return [
+            "name" => $this->getName(),
+            "title" => gettext("DNSMasq"),
+            "enabled" => $object->get("enable"),
+            "running" => $systemCtl->isActive()
+        ];
+    }
 
     /**
      * Update a single entry
      */
     public function updateEntry($conf, $oldconf)
     {
-        global $xmlConfig;
-
         // Create dnsmasq config
-        $cmd = "omv-mkconf dnsmasq 2>&1";
-        OMVUtil::exec($cmd, $output, $result);
-        if ($result !== 0) {
-            throw new OMVException(
-                OMVErrorMsg::E_EXEC_FAILED,
-                $cmd,
-                implode(PHP_EOL, $output)
-            );
-        }
+        $cmd = new \OMV\System\Process("omv-mkconf", "dnsmasq");
+        $cmd->setRedirect2to1();
+        $cmd->execute();
 
         // If WINS support is enabled, we need to
         // regenerate the dnsmasq wins file so that
         // static entries aren't over written by wins
-        $xpath = sprintf("%s/dns-wins", $this->getXPath());
-        if ($xmlConfig->get($xpath) == "1") {
-            $cmd = "/usr/sbin/dnsmasq_wins 2>&1";
-            OMVUtil::exec($cmd, $output, $result);
-            if ($result !== 0) {
-                throw new OMVException(
-                    OMVErrorMsg::E_EXEC_FAILED,
-                    $cmd,
-                    implode(PHP_EOL, $output)
-                );
-            }
+        $db = \OMV\Config\Database::getInstance();
+        $object = $db->get("conf.service.dnsmasq");
+
+        if ($object->get("dns-wins") == "1") {
+            $cmd = new \OMV\System\Process("/usr/sbin/dnsmasq_wins");
+            $cmd->setRedirect2to1(true);
+            $cmd->execute();
+            $cmd = " 2>&1";
         }
 
         // Only need to restart if CNAMEs change.
@@ -153,84 +104,26 @@ class OMVModuleDnsmasq extends OMVModuleServiceAbstract
             $oldconf['cnames'] = '';
 
         if ($conf['cnames'] != $oldconf['cnames']) {
-            $systemCtl = new OMVSystemCtl($this->getPluginName());
+            $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
             $systemCtl->restart();
-
-            // Otherwise, HUP the process
         } else {
+            // Otherwise, HUP the process
             exec("kill -HUP `pidof dnsmasq`");
         }
     }
 
-    /**
-     * Get the module status.
-     */
-    public function getStatus()
-    {
-        global $xmlConfig;
-        $object = $xmlConfig->get( $this->getXPath() );
-        if (is_null($object)) {
-            throw new OMVException(
-                OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED,
-                $this->getXPath()
-            );
-        }
-        $systemCtl = new OMVSystemCtl( $this->getPluginName() );
-        return [
-            'name'    => $this->getName(),
-            'title'   => gettext('DNSMasq'),
-            'enabled' => boolval($object['enable']),
-            'running' => $systemCtl->isActive(),
-        ];
-    }
-
-    /**
-     * Bind listeners.
-     */
-    function bindListeners(OMVNotifyDispatcher $dispatcher)
+    public function bindListeners(\OMV\Engine\Notify\Dispatcher $dispatcher)
     {
         /* Update service if configuration has been modified */
         $dispatcher->addListener(
             OMV_NOTIFY_MODIFY,
-            "org.openmediavault.services.dnsmasq",
-            [ $this, "setDirty" ], 1);
-
+            "org.openmediavault.conf.service.dnsmasq",
+            [ $this, "setDirty" ]
+        );
         $dispatcher->addListener(
-            OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE | OMV_NOTIFY_CREATE,
-            "org.openmediavault.services.dnsmasq.entries.entry",
-            [ $this, "updateEntry" ], 1);
+            OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.service.dnsmasq.entry",
+            [ $this, "updateEntry" ]
+        );
     }
-
 }
-
-// Register module
-$moduleMgr = &OMVModuleMgr::getInstance();
-$moduleMgr->registerModule(new OMVModuleDnsmasq());
-
-// Register logging
-OMVLogFile::registerType("dnsmasq", [
-    "filename" => "dnsmasq.log",
-    "filepath" => "/var/log/dnsmasq.log",
-    "regex"    => "/^([^\s]+\s+\d+\s+\d+:\d+:\d+) .*?\[\d+\]: (.*)$/",
-    "columns"  => [
-        "date"  => [
-            "index" => 1,
-            "func"  => create_function('$v', 'return strpdate($v,"M j G:i:s");')
-        ],
-        "event" => 2
-    ]
-]);
-
-// Register logging
-OMVLogFile::registerType("dnsmasq-dhcp", [
-    "filename" => "dnsmasq-dhcp.log",
-    "filepath" => "/var/log/dnsmasq-dhcp.log",
-    "regex"    => "/^([^\s]+\s+\d+\s+\d+:\d+:\d+) .*?\[\d+\]: (.*)$/",
-    "columns"  => [
-        "date"  => [
-            "index" => 1,
-            "func"  => create_function('$v', 'return strpdate($v,"M j G:i:s");')
-        ],
-        "event" => 2
-    ]
-]);

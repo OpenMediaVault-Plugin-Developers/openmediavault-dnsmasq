@@ -22,10 +22,9 @@
  */
 // require("js/omv/WorkspaceManager.js")
 // require("js/omv/workspace/form/Panel.js")
-// require("js/omv/workspace/window/Form.js")
 // require("js/omv/data/Store.js")
-// require("js/omv/data/Model.js")
 // require("js/omv/data/proxy/Rpc.js")
+// require("js/omv/form/field/SharedFolderComboBox.js")
 // require("js/omv/workspace/window/plugin/ConfigObject.js")
 
 Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
@@ -37,11 +36,12 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
             name       : [
                 "gateway"
             ],
-            conditions : [{
-                name  : "dhcp-enable",
-                value : false
-            }],
-            properties : "allowBlank"
+            conditions : [
+                { name  : "dhcp-enable", value : false }
+            ],
+            properties : [
+                "allowBlank"
+            ]
         }]
     }],
 
@@ -145,9 +145,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
             },{
                 xtype         : "combo",
                 name          : "network",
-                hiddenName    : "network",
                 fieldLabel    : _("Lease Network"),
-                emptyText     : _("Select a network ..."),
                 allowBlank    : true,
                 editable      : false,
                 triggerAction : "all",
@@ -166,13 +164,8 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                         rpcData : {
                             service : "Dnsmasq",
                             method  : "getNetworks"
-                        },
-                        appendSortParams : false
-                    },
-                    sorters : [{
-                        direction : "ASC",
-                        property  : "netid"
-                    }]
+                        }
+                    }
                 })
             },{
                 xtype      : "textfield",
@@ -196,28 +189,24 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 allowBlank : true,
                 value      : ""
             },{
-                xtype         : "combo",
-                name          : "default-lease-time",
-                fieldLabel    : _("Lease Time"),
+                xtype      : "combo",
+                name       : "default-lease-time",
+                fieldLabel : _("Lease Time"),
+                queryMode  : "local",
+                store : [
+                    [ "1h", _("1 hour") ],
+                    [ "3h", _("3 hours") ],
+                    [ "6h", _("6 hours") ],
+                    [ "12h", _("12 hours") ],
+                    [ "24h", _("1 day") ],
+                    [ "48h", _("2 days") ],
+                    [ "96h", _("4 days") ],
+                    [ "168h", _("1 week") ]
+                ],
                 allowBlank    : false,
-                displayField  : "text",
-                valueField    : "value",
-                value         : "24h",
+                editable      : false,
                 triggerAction : "all",
-                mode          : "local",
-                store         : new Ext.data.SimpleStore({
-                    fields : [ "value", "text" ],
-                    data   : [
-                        [ "1h", _("1 hour") ],
-                        [ "3h", _("3 hours") ],
-                        [ "6h", _("6 hours") ],
-                        [ "12h", _("12 hours") ],
-                        [ "24h", _("1 day") ],
-                        [ "48h", _("2 days") ],
-                        [ "96h", _("4 days") ],
-                        [ "168h", _("1 week") ]
-                    ]
-                })
+                value         : "168h"
             },{
                 xtype      : "textfield",
                 name       : "dns-domains",
