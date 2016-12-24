@@ -4,72 +4,78 @@
 	"params": {
 		"type": "object",
 		"properties": {
-		    "enable": {
-		        "type": "boolean",
-		        "required": true
-		    },
+			"enable": {
+				"type": "boolean",
+				"required": true
+			},
 			"dns-log-queries": {
 				"type": "boolean",
-		        "required": true
+				"required": true
 			},
 			"dhcp-enable": {
 				"type": "boolean",
-		        "required": true
+				"required": true
 			},
 			"dns-wins": {
 				"type": "boolean",
-		        "required": true
+				"required": true
 			},
 			"log-dhcp": {
 				"type": "boolean",
-		        "required": true
+				"required": true
 			},
 			"domain-name": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"bootfile": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"gateway": {
 				"type": "string"
 			},
 			"default-lease-time": {
 				"type": "string",
-		        "required": true
+				"required": true
 			},
 			"ntp-servers": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"dns-domains": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"wins-servers": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"dns-servers": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"network": {
 				"type": "string",
-		        "required": false
+				"oneOf": [{
+					"type": "string"
+				},{
+					"type": "string",
+					"maxLength": 0
+				}],
+				"required": false
 			},
 			"first-ip": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"last-ip": {
 				"type": "string",
-		        "required": false
+				"required": false
 			},
 			"extraoptions": {
 				"type": "string",
-		        "required": false
+				"required": false
 			}
 		}
 	}
@@ -97,7 +103,7 @@
 				"required": false
 			},
 			"mac": {
-			    "type": "string",
+				"type": "string",
 				"required": false
 			}
 		}

@@ -42,6 +42,16 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
             properties : [
                 "allowBlank"
             ]
+        },{
+            name       : [
+                "network"
+            ],
+            conditions : [
+                { name  : "dhcp-enable", value : true }
+            ],
+            properties : [
+                "submitValue"
+            ]
         }]
     }],
 
@@ -149,6 +159,7 @@ Ext.define("OMV.module.admin.service.dnsmasq.Settings", {
                 allowBlank    : true,
                 editable      : false,
                 triggerAction : "all",
+                emptyText     : _("Select a network ..."),
                 displayField  : "netid",
                 valueField    : "netid",
                 store         : Ext.create("OMV.data.Store", {
