@@ -69,9 +69,8 @@ case "$1" in
             /bin/cp /etc/default/dnsmasq /etc/default/dnsmasq-orig
         fi
 
-        # Run config and restart dnsmasq
-        omv-mkconf dnsmasq 2>/dev/null
-        deb-systemd-invoke restart dnsmasq || true
+        # Run config
+        omv-mkconf dnsmasq
 
         dpkg-trigger update-fixperms
         dpkg-trigger update-locale

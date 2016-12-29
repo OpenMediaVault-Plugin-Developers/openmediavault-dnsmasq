@@ -37,9 +37,6 @@ class OMVModuleDnsmasq extends \OMV\Engine\Module\ServiceAbstract
         $cmd = new \OMV\System\Process("omv-mkconf", "dnsmasq");
         $cmd->setRedirect2to1();
         $cmd->execute();
-
-        $systemCtl = new \OMV\System\SystemCtl("dnsmasq");
-        $systemCtl->restart();
     }
 
     public function stopService()
