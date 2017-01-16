@@ -236,9 +236,13 @@ class OMVRpcServiceDnsmasq extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         if (TRUE === $isNew) {
             // Check uniqueness - cnames, ip, name
-            $db->assertIsUnique($object, 'cnames');
+            if (!empty($params['cnames']) {
+                $db->assertIsUnique($object, 'cnames');
+            }
             $db->assertIsUnique($object, 'ip');
-            $db->assertIsUnique($object, 'name');
+            if (!empty($params['name']) {
+                $db->assertIsUnique($object, 'name');
+            }
         }
         $db->set($object);
         // Return the configuration object.
