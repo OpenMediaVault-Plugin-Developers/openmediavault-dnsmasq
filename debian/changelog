@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.1.4) stable; urgency=low
+
+  * Change behavior when adding individual entries
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 19 Jan 2017 15:55:20 -0600
+
 openmediavault-dnsmasq (3.1.3) stable; urgency=low
 
   * Fix typo
