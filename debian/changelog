@@ -1,3 +1,9 @@
+openmediavault-dnsmasq (3.1.5) stable; urgency=low
+
+  * Improve foreign content handling
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 18 Mar 2017 09:50:54 -0500
+
 openmediavault-dnsmasq (3.1.4) stable; urgency=low
 
   * Change behavior when adding individual entries
